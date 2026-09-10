@@ -1,0 +1,302 @@
+"""SQLite persistence for filings, incidents, enforcement, and alerts."""
+
+from __future__ import annotations
+
+from contextlib import closing
+from datetime import datetime, timezone
+import json
+from pathlib import Path
+import sqlite3
+
+from cybersec_alerts.models import (
+    Alert,
+    CyberIncident,
+    EnforcementAction,
+    SecFiling,
+)
+
+
+class Store:
+    """SQLite repository for pipeline state and alert history."""
+
+    def __init__(self, path: Path) -> None:
+        self._path = path
+        self._initialize()
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self._path)
+        connection.row_factory = sqlite3.Row
+        return connection
+
+    def _initialize(self) -> None:
+        with closing(self._connect()) as connection:
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS filings (
+                    accession TEXT PRIMARY KEY,
+                    cik TEXT NOT NULL,
+                    company_name TEXT NOT NULL,
+                    form TEXT NOT NULL,
+                    filed_at TEXT NOT NULL,
+                    filing_url TEXT NOT NULL,
+                    document_url TEXT NOT NULL,
+                    items_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS incidents (
+                    accession TEXT PRIMARY KEY,
+                    disclosure_type TEXT NOT NULL,
+                    materiality TEXT NOT NULL,
+                    signals_json TEXT NOT NULL,
+                    summary TEXT NOT NULL,
+                    risk_score INTEGER NOT NULL,
+                    urgency TEXT NOT NULL,
+                    exposures_json TEXT NOT NULL,
+                    actions_json TEXT NOT NULL,
+                    FOREIGN KEY(accession) REFERENCES filings(accession)
+                );
+
+                CREATE TABLE IF NOT EXISTS enforcement_actions (
+                    url TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    release_number TEXT NOT NULL,
+                    source_type TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS enforcement_links (
+                    enforcement_url TEXT NOT NULL,
+                    accession TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(enforcement_url, accession),
+                    FOREIGN KEY(accession) REFERENCES filings(accession)
+                );
+
+                CREATE TABLE IF NOT EXISTS alerts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    accession TEXT NOT NULL,
+                    alert_type TEXT NOT NULL DEFAULT 'filing',
+                    rendered_text TEXT NOT NULL,
+                    enforcement_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(accession) REFERENCES filings(accession)
+                );
+                """
+            )
+            _ensure_alert_type_column(connection)
+            connection.commit()
+
+    def seen(self, accession: str) -> bool:
+        """Returns whether a filing accession already exists."""
+        with closing(self._connect()) as connection:
+            row = connection.execute(
+                "SELECT 1 FROM filings WHERE accession = ? LIMIT 1",
+                (accession,),
+            ).fetchone()
+        return row is not None
+
+    def save_filing(self, filing: SecFiling) -> None:
+        """Persists a filing if it has not already been stored."""
+        with closing(self._connect()) as connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO filings (
+                    accession, cik, company_name, form, filed_at,
+                    filing_url, document_url, items_json, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    filing.accession,
+                    filing.cik,
+                    filing.company_name,
+                    filing.form,
+                    filing.filed_at.isoformat(),
+                    filing.filing_url,
+                    filing.document_url,
+                    json.dumps(filing.items),
+                    _utc_now(),
+                ),
+            )
+            connection.commit()
+
+    def save_incident(self, incident: CyberIncident) -> None:
+        """Persists a classified/scored incident."""
+        with closing(self._connect()) as connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO incidents (
+                    accession, disclosure_type, materiality, signals_json,
+                    summary, risk_score, urgency, exposures_json, actions_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    incident.filing.accession,
+                    incident.disclosure_type.value,
+                    incident.materiality.value,
+                    json.dumps(incident.signals),
+                    incident.summary,
+                    incident.risk_score,
+                    incident.urgency.value,
+                    json.dumps(incident.exposures),
+                    json.dumps(incident.recommended_actions),
+                ),
+            )
+            connection.commit()
+
+    def save_alert(self, alert: Alert) -> None:
+        """Persists a filing-triggered alert."""
+        enforcement = [
+            {
+                "title": action.title,
+                "url": action.url,
+                "release_number": action.release_number,
+                "source_type": action.source_type,
+            }
+            for action in alert.enforcement_matches
+        ]
+        self.save_rendered_alert(
+            accession=alert.incident.filing.accession,
+            alert_type="filing",
+            rendered_text=alert.rendered_text,
+            enforcement=enforcement,
+            created_at=alert.created_at.isoformat(),
+        )
+
+    def save_rendered_alert(
+        self,
+        accession: str,
+        alert_type: str,
+        rendered_text: str,
+        enforcement: list[dict[str, str]],
+        created_at: str | None = None,
+    ) -> None:
+        """Persists a generic rendered alert."""
+        with closing(self._connect()) as connection:
+            connection.execute(
+                """
+                INSERT INTO alerts (
+                    accession, alert_type, rendered_text,
+                    enforcement_json, created_at
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    accession,
+                    alert_type,
+                    rendered_text,
+                    json.dumps(enforcement),
+                    created_at or _utc_now(),
+                ),
+            )
+            connection.commit()
+
+    def tracked_incidents(self) -> list[sqlite3.Row]:
+        """Returns issuers and accessions with classified cyber incidents."""
+        with closing(self._connect()) as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    f.accession,
+                    f.cik,
+                    f.company_name,
+                    f.document_url,
+                    f.filed_at,
+                    i.disclosure_type,
+                    i.risk_score
+                FROM filings AS f
+                JOIN incidents AS i ON i.accession = f.accession
+                ORDER BY f.filed_at DESC
+                """
+            ).fetchall()
+        return list(rows)
+
+    def save_enforcement_action(self, action: EnforcementAction) -> None:
+        """Persists an observed SEC enforcement action."""
+        with closing(self._connect()) as connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO enforcement_actions (
+                    url, title, release_number, source_type, created_at
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    action.url,
+                    action.title,
+                    action.release_number,
+                    action.source_type,
+                    _utc_now(),
+                ),
+            )
+            connection.commit()
+
+    def enforcement_link_exists(
+        self,
+        action_url: str,
+        accession: str,
+    ) -> bool:
+        """Returns whether an action was already linked to an incident."""
+        with closing(self._connect()) as connection:
+            row = connection.execute(
+                """
+                SELECT 1
+                FROM enforcement_links
+                WHERE enforcement_url = ? AND accession = ?
+                LIMIT 1
+                """,
+                (action_url, accession),
+            ).fetchone()
+        return row is not None
+
+    def save_enforcement_link(
+        self,
+        action_url: str,
+        accession: str,
+    ) -> None:
+        """Persists a longitudinal enforcement-to-filing link."""
+        with closing(self._connect()) as connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO enforcement_links (
+                    enforcement_url, accession, created_at
+                ) VALUES (?, ?, ?)
+                """,
+                (action_url, accession, _utc_now()),
+            )
+            connection.commit()
+
+    def recent_alerts(self, limit: int = 20) -> list[sqlite3.Row]:
+        """Returns recent alert rows joined to issuer metadata."""
+        with closing(self._connect()) as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    a.id,
+                    a.accession,
+                    a.alert_type,
+                    f.company_name,
+                    a.rendered_text,
+                    a.created_at
+                FROM alerts AS a
+                JOIN filings AS f ON f.accession = a.accession
+                ORDER BY a.id DESC
+                LIMIT ?
+                """,
+                (max(1, limit),),
+            ).fetchall()
+        return list(rows)
+
+
+def _ensure_alert_type_column(connection: sqlite3.Connection) -> None:
+    columns = {
+        row[1]
+        for row in connection.execute("PRAGMA table_info(alerts)").fetchall()
+    }
+    if "alert_type" not in columns:
+        connection.execute(
+            "ALTER TABLE alerts ADD COLUMN alert_type TEXT NOT NULL "
+            "DEFAULT 'filing'"
+        )
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()

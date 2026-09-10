@@ -1,0 +1,19 @@
+[CRITICAL] CYBERSEC SEC ALERT — Example Holdings, Inc.
+
+FILING: Item 1.05 — Material Cybersecurity Incident
+RISK SCORE: 100/100
+MATERIALITY: Registrant has determined the incident is material.
+
+WHAT HAPPENED
+The registrant disclosed a material cybersecurity incident involving
+unauthorized access, customer-data exfiltration, and operational disruption.
+
+WHY IT MATTERS
+The registrant has crossed the SEC Item 1.05 materiality threshold. Review
+filing timing, evolving impact, prior risk statements, insurance implications,
+and follow-on litigation.
+
+ACTION NOW
+- Compare against prior Item 1C and cyber-risk disclosures.
+- Track 8-K/A, 10-Q/10-K updates, quantified impacts, notices, and litigation.
+- Reassess underwriting severity and business-interruption exposure.

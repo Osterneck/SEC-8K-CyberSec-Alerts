@@ -1,0 +1,61 @@
+[CRITICAL] CYBERSEC SEC ALERT — Example Holdings, Inc.
+
+FILING: Item 1.05 — Material Cybersecurity Incident
+RISK SCORE: 100/100
+MATERIALITY: Registrant has determined the incident is material.
+
+WHAT HAPPENED
+Item 1.05 Material Cybersecurity Incidents. Example Holdings, Inc. determined that a cybersecurity incident involving unauthorized access to portions of its network is material.
+
+WHY IT MATTERS
+The registrant has crossed the SEC's Item 1.05 materiality threshold. Review disclosure timing, evolving impact, prior risk statements, insurance implications, and follow-on litigation.
+
+EXPOSURE SIGNALS
+- SEC disclosure and materiality process
+- securities litigation / disclosure scrutiny
+- privacy notification and regulatory exposure
+- business interruption / cyber coverage exposure
+- data-loss, extortion, and claims severity
+- cyber insurance underwriting change signal
+
+ACTION NOW
+- Review the filing against prior cyber disclosures and Item 1C risk language.
+- Track amendments, quantified impacts, regulator notices, and new litigation.
+- Identify the materiality-determination date and review the four-business-day Item 1.05 filing timeline.
+- Assess affected-person scope, state notice triggers, contractual notice duties, and privacy regulator exposure.
+- Reassess business-interruption severity, recovery timeline, and dependent-business exposure.
+
+SEC ENFORCEMENT HISTORY SIGNAL
+No recent same-entity SEC civil or administrative action matched by the MVP entity resolver. This is not a finding of no enforcement history.
+
+SOURCE: https://www.sec.gov/example.htm
+
+[MODERATE] CYBERSEC SEC ALERT — Example Services Corp.
+
+FILING: Item 8.01 — Cybersecurity / Other Event
+RISK SCORE: 48/100
+MATERIALITY: Materiality is not yet determined or remains unresolved.
+
+WHAT HAPPENED
+Example Services Corp. detected unauthorized access involving a third-party service provider.
+
+WHY IT MATTERS
+This is a cyber-related Item 8.01 disclosure rather than an Item 1.05 material-incident filing. Treat it as an early-warning signal and watch for a later materiality determination or Item 1.05 filing.
+
+EXPOSURE SIGNALS
+- SEC disclosure and materiality process
+- privacy notification and regulatory exposure
+- third-party and vendor-management exposure
+- cyber insurance underwriting change signal
+
+ACTION NOW
+- Review the filing against prior cyber disclosures and Item 1C risk language.
+- Track amendments, quantified impacts, regulator notices, and new litigation.
+- Watch for a later Item 1.05 filing if the registrant subsequently determines the incident is material, including the resulting four-business-day filing timeline.
+- Identify the vendor/service provider and map portfolio or insured concentration exposure.
+- Assess affected-person scope, state notice triggers, contractual notice duties, and privacy regulator exposure.
+
+SEC ENFORCEMENT HISTORY SIGNAL
+No recent same-entity SEC civil or administrative action matched by the MVP entity resolver. This is not a finding of no enforcement history.
+
+SOURCE: https://www.sec.gov/example.htm

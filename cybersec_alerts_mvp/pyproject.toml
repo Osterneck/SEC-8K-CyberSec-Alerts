@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cybersec-alerts"
+version = "0.1.0"
+description = "Actionable SEC cybersecurity filing alerts for legal and risk teams."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  {name = "Project Team"}
+]
+license = {text = "Proprietary - rough-draft MVP"}
+dependencies = []
+
+[project.scripts]
+cybersec-alerts = "cybersec_alerts.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
