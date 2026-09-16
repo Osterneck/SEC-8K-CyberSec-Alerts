@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,8 +161,8 @@ function renderCard(a, isNew=false) {
   const dtype = formatDisclosureType(a.disclosure_type ?? '');
   const mat = formatMateriality(a.materiality ?? '');
   const rendered = a.rendered_text ?? '';
-  const exposuresRaw = a.exposures ?? [];
-  const exposures = Array.isArray(exposuresRaw) ? exposuresRaw.join(', ') : exposuresRaw;
+  const exposuresRaw = a.exposures ?? a.exposures_json ?? [];
+  const exposures = Array.isArray(exposuresRaw) ? exposuresRaw.join(', ') : (typeof exposuresRaw === 'string' ? exposuresRaw : '');
   const filedAt = a.filed_at ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '';
   const newTag = isNew ? '<span class="new-badge">NEW</span>' : '';
 
