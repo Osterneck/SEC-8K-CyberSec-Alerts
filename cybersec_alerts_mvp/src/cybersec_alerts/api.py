@@ -122,14 +122,14 @@ def scan(
             status_code=503,
             detail="SEC_USER_AGENT not configured — live scan unavailable.",
         )
-    rendered = _pipeline.run_once(
+    alerts = _pipeline.run_once_structured(
         limit=limit,
         enforcement_pages=enforcement_pages,
     )
     return {
         "source": "live",
-        "new_alerts": len(rendered),
-        "alerts": rendered,
+        "new_alerts": len(alerts),
+        "alerts": [_alert_to_dict(a) for a in alerts],
     }
 
 
