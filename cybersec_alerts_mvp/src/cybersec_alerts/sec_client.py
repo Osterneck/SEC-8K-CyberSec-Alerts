@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
+import json
 import re
 import time
 from urllib import parse, request
@@ -16,6 +17,9 @@ from cybersec_alerts.text_utils import html_to_text
 
 
 CURRENT_FILINGS_URL = "https://www.sec.gov/cgi-bin/browse-edgar"
+EFTS_URL = "https://efts.sec.gov/LATEST/search-index?q=%22Item+1.05%22+%228-K%22&dateRange=custom&startdt={start}&enddt={end}&forms=8-K"
+EFTS_SEARCH_URL = "https://efts.sec.gov/LATEST/search-index?q=%22Item+8.01%22+%228-K%22&dateRange=custom&startdt={start}&enddt={end}&forms=8-K"
+EFTS_BASE = "https://efts.sec.gov/LATEST/search-index"
 SEC_BASE_URL = "https://www.sec.gov"
 
 
@@ -76,13 +80,6 @@ class SecClient:
         timeout_seconds: float = 20.0,
         min_request_interval: float = 0.12,
     ) -> None:
-        """Initializes the client.
-
-        Args:
-            user_agent: Descriptive SEC User-Agent with contact information.
-            timeout_seconds: Network timeout per request.
-            min_request_interval: Minimum delay between SEC requests.
-        """
         if not user_agent:
             raise ValueError(
                 "SEC_USER_AGENT is required for live SEC requests."
@@ -93,14 +90,7 @@ class SecClient:
         self._last_request_at = 0.0
 
     def list_current_8k(self, limit: int = 40) -> list[FeedEntry]:
-        """Returns current Form 8-K feed entries.
-
-        Args:
-            limit: Maximum feed entries requested from EDGAR.
-
-        Returns:
-            Parsed current-filings entries.
-        """
+        """Returns current Form 8-K feed entries."""
         count = max(1, min(limit, 100))
         query = parse.urlencode(
             {
@@ -117,15 +107,81 @@ class SecClient:
         payload = self._get(f"{CURRENT_FILINGS_URL}?{query}")
         return self._parse_atom(payload)[:limit]
 
-    def fetch_filing(self, entry: FeedEntry) -> SecFiling:
-        """Downloads and normalizes a filing from a feed entry.
+    def search_cyber_filings(self, days_back: int = 30, limit: int = 40) -> list[FeedEntry]:
+        """Searches EDGAR full-text for recent Item 1.05 and 8.01 filings.
 
         Args:
-            entry: Current-filings feed entry.
+            days_back: How many days back to search.
+            limit: Maximum results to return.
 
         Returns:
-            Fully normalized SEC filing.
+            FeedEntry list for matching cyber filings.
         """
+        end = datetime.now(timezone.utc).date()
+        start = (datetime.now(timezone.utc) - timedelta(days=days_back)).date()
+        entries: list[FeedEntry] = []
+
+        for item_term in ["Item+1.05", "Item+8.01"]:
+            url = (
+                f"https://efts.sec.gov/LATEST/search-index"
+                f"?q=%22{item_term}%22&forms=8-K"
+                f"&dateRange=custom&startdt={start}&enddt={end}"
+                f"&_source=file_date,entity_name,file_num,period_of_report,biz_location,inc_states"
+            )
+            try:
+                payload = self._get(url)
+                data = json.loads(payload)
+                hits = data.get("hits", {}).get("hits", [])
+                for hit in hits:
+                    src = hit.get("_source", {})
+                    accession_raw = hit.get("_id", "")
+                    accession = accession_raw.replace(":", "-") if accession_raw else ""
+                    cik = hit.get("_index", "").replace("edgar_", "").zfill(10)
+                    company_name = src.get("entity_name", "Unknown")
+                    filed_str = src.get("file_date", "")
+                    filed_at = _parse_datetime(filed_str)
+                    if not accession:
+                        continue
+                    accession_nodash = accession.replace("-", "")
+                    filing_url = (
+                        f"{SEC_BASE_URL}/cgi-bin/browse-edgar"
+                        f"?action=getcompany&filenum=&State=0&SIC=&dateb=&owner=include"
+                        f"&count=40&search_text="
+                    )
+                    # Build proper index URL from accession
+                    parts = accession.split("-")
+                    if len(parts) == 3:
+                        cik_part = parts[0].lstrip("0") or "0"
+                        filing_url = (
+                            f"{SEC_BASE_URL}/Archives/edgar/data/"
+                            f"{cik_part}/{accession_nodash}/{accession}-index.htm"
+                        )
+                    entries.append(FeedEntry(
+                        company_name=company_name,
+                        cik=cik,
+                        form="8-K",
+                        filed_at=filed_at,
+                        filing_url=filing_url,
+                        accession=accession,
+                    ))
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                import logging
+                logging.getLogger(__name__).warning(
+                    "EFTS search failed for %s: %s", item_term, exc
+                )
+
+        # Deduplicate by accession
+        seen: set[str] = set()
+        unique: list[FeedEntry] = []
+        for e in entries:
+            if e.accession not in seen:
+                seen.add(e.accession)
+                unique.append(e)
+
+        return unique[:limit]
+
+    def fetch_filing(self, entry: FeedEntry) -> SecFiling:
+        """Downloads and normalizes a filing from a feed entry."""
         index_html = self._get(entry.filing_url)
         document_url = self._primary_document_url(index_html)
         document_html = self._get(document_url)
@@ -163,7 +219,7 @@ class SecClient:
             url,
             headers={
                 "User-Agent": self._user_agent,
-                "Accept": "text/html,application/atom+xml,*/*;q=0.8",
+                "Accept": "text/html,application/atom+xml,application/json,*/*;q=0.8",
             },
         )
         try:
@@ -230,7 +286,6 @@ class SecClient:
 
 
 def _parse_feed_title(title: str) -> tuple[str, str, str]:
-    """Parses common EDGAR current-feed title formats."""
     cleaned = re.sub(r"\s+", " ", title).strip()
     form_match = re.search(r"\b(8-K(?:/A)?)\b", cleaned, re.IGNORECASE)
     cik_match = re.search(r"\((\d{7,10})\)", cleaned)
@@ -239,7 +294,7 @@ def _parse_feed_title(title: str) -> tuple[str, str, str]:
 
     company = cleaned
     if form_match:
-        company = cleaned[form_match.end() :].lstrip(" -:")
+        company = cleaned[form_match.end():].lstrip(" -:")
     if cik_match:
         company = company.replace(cik_match.group(0), "").strip(" -")
     company = re.sub(r"\s*\((Filer|Issuer)\)\s*$", "", company)
