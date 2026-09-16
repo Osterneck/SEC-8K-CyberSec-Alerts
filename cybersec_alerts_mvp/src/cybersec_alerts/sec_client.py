@@ -1,3 +1,4 @@
+
 """SEC EDGAR ingestion client."""
 
 from __future__ import annotations
@@ -117,20 +118,17 @@ class SecClient:
                 hits = data.get("hits", {}).get("hits", [])
                 for hit in hits:
                     src = hit.get("_source", {})
-                    # Correct field mapping from actual EFTS response
                     adsh = src.get("adsh", "")
                     if not adsh:
                         continue
                     ciks = src.get("ciks", [])
                     cik = ciks[0].lstrip("0") if ciks else "0"
                     display_names = src.get("display_names", [])
-                    # display_names[0] is like "Park Dental Partners, Inc.  (PARK) (CIK 0002069604)"
                     raw_name = display_names[0] if display_names else "Unknown"
-                    company_name = re.sub(r"\s*\(.*?\)\s*$", "", raw_name).strip()
+                    company_name = re.sub(r"\s*\([^)]*\)\s*$", "", raw_name).strip()
                     company_name = re.sub(r"\s*\(CIK\s*\d+\)\s*", "", company_name).strip()
                     filed_str = src.get("file_date", "")
                     filed_at = _parse_datetime(filed_str)
-                    # Build filing index URL from adsh and cik
                     adsh_nodash = adsh.replace("-", "")
                     filing_url = (
                         f"{SEC_BASE_URL}/Archives/edgar/data/"
@@ -199,6 +197,28 @@ class SecClient:
         return raw.decode(charset, errors="replace")
 
     @staticmethod
+    def _primary_document_url(index_html: str) -> str:
+        parser = _IndexLinkParser()
+        parser.feed(index_html)
+        candidates: list[str] = []
+        for href, label in parser.links:
+            # Strip inline XBRL viewer prefix — SEC wraps docs in /ix?doc=
+            if href.startswith("/ix?doc="):
+                href = href[len("/ix?doc="):]
+            lower = href.lower()
+            if not lower.endswith((".htm", ".html")):
+                continue
+            if "-index" in lower:
+                continue
+            if label.strip().lower() in {"8-k", "8-k/a"}:
+                return parse.urljoin(SEC_BASE_URL, href)
+            if "/archives/edgar/data/" in lower:
+                candidates.append(href)
+        if not candidates:
+            raise SecClientError("Could not identify primary filing document.")
+        return parse.urljoin(SEC_BASE_URL, candidates[0])
+
+    @staticmethod
     def _parse_atom(payload: str) -> list[FeedEntry]:
         namespace = {"atom": "http://www.w3.org/2005/Atom"}
         root = ElementTree.fromstring(payload)
@@ -219,25 +239,6 @@ class SecClient:
                 accession=accession,
             ))
         return entries
-
-    @staticmethod
-    def _primary_document_url(index_html: str) -> str:
-        parser = _IndexLinkParser()
-        parser.feed(index_html)
-        candidates: list[str] = []
-        for href, label in parser.links:
-            lower = href.lower()
-            if not lower.endswith((".htm", ".html")):
-                continue
-            if "-index" in lower:
-                continue
-            if label.strip().lower() in {"8-k", "8-k/a"}:
-                return parse.urljoin(SEC_BASE_URL, href)
-            if "/archives/edgar/data/" in lower:
-                candidates.append(href)
-        if not candidates:
-            raise SecClientError("Could not identify primary filing document.")
-        return parse.urljoin(SEC_BASE_URL, candidates[0])
 
 
 def _parse_feed_title(title: str) -> tuple[str, str, str]:
