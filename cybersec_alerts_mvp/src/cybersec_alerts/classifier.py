@@ -1,3 +1,4 @@
+
 """Explainable cybersecurity filing classifier."""
 
 from __future__ import annotations
@@ -81,19 +82,36 @@ _CYBER_TERMS = (
     "compromised systems",
 )
 
+# Boilerplate phrases to skip when building the summary
+_BOILERPLATE_PATTERNS = (
+    "emerging growth company",
+    "indicate by check mark",
+    "securities exchange act",
+    "commission file number",
+    "pursuant to section 13",
+    "pursuant to rule",
+    "incorporated in",
+    "state of incorporation",
+    "internal revenue",
+    "registrant's telephone",
+    "written communications",
+    "soliciting material",
+    "pre-commencement",
+    "check the following",
+    "shell company",
+    "transition period",
+    "fiscal year",
+    "form 8-k",
+    "current report",
+    "date of report",
+    "date of earliest",
+)
+
 
 class CyberFilingClassifier:
     """Classifies Form 8-K cybersecurity disclosures."""
 
     def classify(self, filing: SecFiling) -> CyberIncident | None:
-        """Classifies a filing as a supported cyber disclosure.
-
-        Args:
-            filing: Normalized SEC filing.
-
-        Returns:
-            CyberIncident when the filing is in scope; otherwise None.
-        """
         text_lower = filing.text.lower()
         has_105 = _contains_item(filing, "1.05")
         has_801 = _contains_item(filing, "8.01")
@@ -172,21 +190,28 @@ def _infer_801_materiality(text_lower: str) -> MaterialityState:
         r"(?:is|was) material",
         text_lower,
     )
-    if positive_match or any(
-        pattern in text_lower for pattern in positive_patterns
-    ):
+    if positive_match or any(p in text_lower for p in positive_patterns):
         return MaterialityState.MATERIAL
-    if any(pattern in text_lower for pattern in negative_patterns):
+    if any(p in text_lower for p in negative_patterns):
         return MaterialityState.NOT_MATERIAL
-    if any(pattern in text_lower for pattern in undetermined_patterns):
+    if any(p in text_lower for p in undetermined_patterns):
         return MaterialityState.UNDETERMINED
     return MaterialityState.UNDETERMINED
 
 
+def _is_boilerplate(sentence: str) -> bool:
+    """Returns True if the sentence is cover-page or form boilerplate."""
+    lower = sentence.lower()
+    return any(pattern in lower for pattern in _BOILERPLATE_PATTERNS)
+
+
 def _summarize(text: str, disclosure_type: DisclosureType) -> str:
+    """Extracts 1-2 substantive cyber sentences, skipping boilerplate."""
     cyber_sentences: list[str] = []
     for sentence in sentence_candidates(text):
         lower = sentence.lower()
+        if _is_boilerplate(sentence):
+            continue
         if any(term in lower for term in _CYBER_TERMS):
             if len(sentence) > 420:
                 sentence = f"{sentence[:417].rstrip()}..."
@@ -197,5 +222,5 @@ def _summarize(text: str, disclosure_type: DisclosureType) -> str:
     if cyber_sentences:
         return " ".join(cyber_sentences)
     if disclosure_type == DisclosureType.ITEM_1_05:
-        return "Registrant filed an Item 1.05 material cyber disclosure."
+        return "Registrant filed an Item 1.05 material cybersecurity incident disclosure."
     return "Registrant filed a cyber-related Item 8.01 disclosure."
