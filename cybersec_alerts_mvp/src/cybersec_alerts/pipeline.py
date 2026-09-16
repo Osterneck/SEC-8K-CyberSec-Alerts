@@ -42,17 +42,27 @@ class AlertPipeline:
     ) -> list[str]:
         """Runs one full filing and enforcement correlation cycle.
 
-        Args:
-            limit: Maximum current 8-K feed entries to inspect.
-            enforcement_pages: Pages to inspect for each SEC action index.
+        Returns:
+            Newly generated rendered alert bodies (strings) — for CLI use.
+        """
+        alerts = self.run_once_structured(limit=limit, enforcement_pages=enforcement_pages)
+        return [a.rendered_text for a in alerts]
+
+    def run_once_structured(
+        self,
+        limit: int = 40,
+        enforcement_pages: int = 3,
+    ) -> list[Alert]:
+        """Runs one full filing and enforcement correlation cycle.
 
         Returns:
-            Newly generated rendered alert bodies.
+            Newly generated Alert objects — for API/web use.
         """
         actions = self._safe_enforcement_fetch(enforcement_pages)
-        rendered = self._process_enforcement_updates(actions)
+        self._process_enforcement_updates(actions)
         entries = self._sec_client.list_current_8k(limit=limit)
 
+        alerts: list[Alert] = []
         for entry in entries:
             if entry.accession and self._store.seen(entry.accession):
                 continue
@@ -81,8 +91,8 @@ class AlertPipeline:
             )
             alert.rendered_text = self._renderer.render(alert)
             self._store.save_alert(alert)
-            rendered.append(alert.rendered_text)
-        return rendered
+            alerts.append(alert)
+        return alerts
 
     def _process_enforcement_updates(
         self,
