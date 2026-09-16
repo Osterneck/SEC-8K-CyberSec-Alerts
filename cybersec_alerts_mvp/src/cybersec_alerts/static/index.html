@@ -15,13 +15,17 @@
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
   main { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
-  .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-  .toolbar-left { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
   button { cursor: pointer; font-size: 0.85rem; font-weight: 500; border: none; border-radius: 6px; padding: 0.5rem 1.1rem; transition: opacity .15s; }
   button:disabled { opacity: 0.45; cursor: not-allowed; }
   #btn-scan { background: #1e40af; color: #dbeafe; }
   #btn-history { background: #1e3a2e; color: #86efac; }
   #status { font-size: 0.8rem; color: #64748b; }
+  .tabs { display: flex; border-bottom: 2px solid #2d3748; margin-bottom: 1.25rem; }
+  .tab { cursor: pointer; font-size: 0.85rem; font-weight: 600; border: none; background: transparent; color: #64748b; padding: 0.6rem 1.25rem; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .15s; }
+  .tab.active-all { color: #93c5fd; border-bottom-color: #3b82f6; }
+  .tab.active-105 { color: #ddd6fe; border-bottom-color: #a855f7; }
+  .tab.active-801 { color: #a5f3fc; border-bottom-color: #06b6d4; }
   .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
   .badge-critical { background: #7f1d1d; color: #fca5a5; }
   .badge-high     { background: #78350f; color: #fcd34d; }
@@ -37,6 +41,8 @@
   .card-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 0.6rem; }
   .score-bar { background: #2d3748; border-radius: 4px; height: 4px; margin-bottom: 0.75rem; }
   .score-fill { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#1e40af,#3b82f6); }
+  .score-fill-105 { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#6b21a8,#a855f7); }
+  .score-fill-801 { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#0e7490,#06b6d4); }
   .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; border-left: 3px solid #3b82f6; padding-left: 0.75rem; }
   .card-links { margin-bottom: 0.5rem; }
   .card-links a { font-size: 0.78rem; color: #3b82f6; text-decoration: none; margin-right: 1rem; }
@@ -60,11 +66,14 @@
 </header>
 <main>
   <div class="toolbar">
-    <div class="toolbar-left">
-      <button id="btn-scan" onclick="runScan()">&#9654; Refresh &amp; Scan</button>
-      <button id="btn-history" onclick="loadHistory()">History</button>
-      <span id="status"></span>
-    </div>
+    <button id="btn-scan" onclick="runScan()">&#9654; Refresh &amp; Scan</button>
+    <button id="btn-history" onclick="loadHistory()">History</button>
+    <span id="status"></span>
+  </div>
+  <div class="tabs">
+    <button class="tab active-all" id="tab-all" onclick="setFilter('all',this)">All Cyber Filings</button>
+    <button class="tab" id="tab-105" onclick="setFilter('1.05',this)">&#9888; Item 1.05 &mdash; Material</button>
+    <button class="tab" id="tab-801" onclick="setFilter('8.01',this)">&#9711; Item 8.01 &mdash; Voluntary</button>
   </div>
   <div id="alerts-container"><div id="empty">Loading most recent alerts...</div></div>
 </main>
@@ -73,13 +82,16 @@ var BASE = '';
 var status = document.getElementById('status');
 var container = document.getElementById('alerts-container');
 var lastUpdated = document.getElementById('last-updated');
+var currentFilter = 'all';
+var currentMode = 'scan';
+var allAlerts = [];
 
 function setStatus(msg, loading) {
   status.textContent = loading ? '... ' + msg : msg;
 }
 
 function formatNow() {
-  return new Date().toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+  return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
 }
 
 function safe(s) {
@@ -113,6 +125,30 @@ function formatMateriality(raw) {
   return raw;
 }
 
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(function(t) { t.className = 'tab'; });
+  var cls = {all:'active-all','1.05':'active-105','8.01':'active-801'}[f];
+  el.className = 'tab ' + cls;
+  renderRows(allAlerts);
+}
+
+function scoreFillClass() {
+  if (currentFilter === '1.05') return 'score-fill-105';
+  if (currentFilter === '8.01') return 'score-fill-801';
+  return 'score-fill';
+}
+
+function filterAlerts(rows) {
+  if (currentFilter === 'all') return rows;
+  return rows.filter(function(a) {
+    var dtype = a.disclosure_type || '';
+    if (currentFilter === '1.05') return dtype.indexOf('1_05') > -1 || dtype.indexOf('1.05') > -1;
+    if (currentFilter === '8.01') return dtype.indexOf('8_01') > -1 || dtype.indexOf('8.01') > -1;
+    return true;
+  });
+}
+
 function renderCard(a, isNew) {
   var score = a.risk_score || 0;
   var company = a.company_name || '-';
@@ -127,6 +163,7 @@ function renderCard(a, isNew) {
   var exposures = Array.isArray(exposuresRaw) ? exposuresRaw.join(', ') : (typeof exposuresRaw === 'string' ? exposuresRaw : '');
   var filedAt = a.filed_at ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '';
   var newTag = isNew ? '<span class="new-badge">NEW</span>' : '';
+  var fill = scoreFillClass();
 
   return '<div class="card">' +
     '<div class="card-header">' +
@@ -135,7 +172,7 @@ function renderCard(a, isNew) {
       '<span class="card-company">' + safe(company) + '</span>' + newTag +
       '<span style="font-size:.75rem;color:#475569;margin-left:auto">Score: ' + score + '/100</span>' +
     '</div>' +
-    '<div class="score-bar"><div class="score-fill" style="width:' + score + '%"></div></div>' +
+    '<div class="score-bar"><div class="' + fill + '" style="width:' + score + '%"></div></div>' +
     '<div class="card-meta">' + safe(dtype) + (mat ? ' &nbsp;&middot;&nbsp; ' + safe(mat) : '') + (filedAt ? ' &nbsp;&middot;&nbsp; Filed: ' + safe(filedAt) : '') + (accession ? ' &nbsp;&middot;&nbsp; ' + safe(accession) : '') + '</div>' +
     (summary ? '<div class="card-summary">' + safe(summary) + '</div>' : '') +
     (exposures ? '<div class="exposures">Exposures: ' + safe(exposures) + '</div>' : '') +
@@ -146,18 +183,20 @@ function renderCard(a, isNew) {
 
 function renderRows(rows, newAccessions) {
   newAccessions = newAccessions || {};
-  if (!rows || !rows.length) {
-    container.innerHTML = '<div id="empty">No qualifying cyber alerts found.</div>';
+  var filtered = filterAlerts(rows);
+  if (!filtered || !filtered.length) {
+    container.innerHTML = '<div id="empty">No qualifying cyber alerts found for this filter.</div>';
     return;
   }
   var html = '';
-  for (var i = 0; i < rows.length; i++) {
-    html += renderCard(rows[i], newAccessions[rows[i].accession]);
+  for (var i = 0; i < filtered.length; i++) {
+    html += renderCard(filtered[i], newAccessions[filtered[i].accession]);
   }
   container.innerHTML = html;
 }
 
 function runScan() {
+  currentMode = 'scan';
   setStatus('Scanning EDGAR for Item 1.05 & 8.01 filings...', true);
   document.getElementById('btn-scan').disabled = true;
   fetch(BASE + '/api/scan')
@@ -165,7 +204,8 @@ function runScan() {
     .then(function(d) {
       var newSet = {};
       (d.new_alert_accessions || []).forEach(function(a) { newSet[a] = true; });
-      renderRows(d.alerts || [], newSet);
+      allAlerts = d.alerts || [];
+      renderRows(allAlerts, newSet);
       var n = d.new_alerts || 0;
       setStatus(n > 0 ? n + ' new filing(s) detected' : 'Up to date - showing most recent alerts');
       lastUpdated.textContent = 'Last updated: ' + formatNow();
@@ -175,11 +215,13 @@ function runScan() {
 }
 
 function loadHistory() {
+  currentMode = 'history';
   setStatus('Loading history...', true);
   fetch(BASE + '/api/history?limit=50')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      renderRows(d.alerts || []);
+      allAlerts = d.alerts || [];
+      renderRows(allAlerts);
       setStatus('History - ' + d.count + ' record(s)');
       lastUpdated.textContent = 'Last updated: ' + formatNow();
     })
