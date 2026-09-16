@@ -1,4 +1,3 @@
-
 """Alert pipeline orchestration."""
 
 from __future__ import annotations
@@ -42,7 +41,10 @@ class AlertPipeline:
         enforcement_pages: int = 3,
     ) -> list[str]:
         """Returns rendered alert strings — for CLI use."""
-        alerts = self.run_once_structured(limit=limit, enforcement_pages=enforcement_pages)
+        alerts = self.run_once_structured(
+            limit=limit,
+            enforcement_pages=enforcement_pages,
+        )
         return [a.rendered_text for a in alerts]
 
     def run_once_structured(
@@ -50,10 +52,7 @@ class AlertPipeline:
         limit: int = 40,
         enforcement_pages: int = 3,
     ) -> list[Alert]:
-        """Runs one full cycle using EFTS cyber filing search.
-
-        Searches EDGAR full-text for Item 1.05 and 8.01 filings from the
-        last 30 days, then classifies, scores, and stores qualifying alerts.
+        """Runs one full cycle using EFTS Item 1.05/8.01 targeted search.
 
         Returns:
             Newly generated Alert objects.
@@ -61,8 +60,11 @@ class AlertPipeline:
         actions = self._safe_enforcement_fetch(enforcement_pages)
         self._process_enforcement_updates(actions)
 
-        # Use targeted cyber filing search instead of generic 8-K feed
-        entries = self._sec_client.search_cyber_filings(days_back=30, limit=limit)
+        # Use targeted EFTS cyber search — not generic 8-K feed
+        entries = self._sec_client.search_cyber_filings(
+            days_back=30,
+            limit=limit,
+        )
         LOGGER.info("EFTS cyber search returned %d entries", len(entries))
 
         alerts: list[Alert] = []
