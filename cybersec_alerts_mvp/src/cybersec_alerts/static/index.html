@@ -34,12 +34,13 @@
   .card-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 0.6rem; }
   .score-bar { background: #2d3748; border-radius: 4px; height: 4px; margin-bottom: 0.75rem; }
   .score-fill { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#1e40af,#3b82f6); }
-  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; border-left: 3px solid #2d3748; padding-left: 0.75rem; }
+  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; border-left: 3px solid #3b82f6; padding-left: 0.75rem; }
+  .card-links { margin-bottom: 0.5rem; }
   .card-links a { font-size: 0.78rem; color: #3b82f6; text-decoration: none; margin-right: 1rem; }
   .card-links a:hover { text-decoration: underline; }
+  .exposures { font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; }
   .filing-text-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #475569; margin: 0.75rem 0 0.4rem; }
   .filing-text { background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #94a3b8; white-space: pre-wrap; line-height: 1.65; max-height: 320px; overflow-y: auto; }
-  .exposures { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
   #empty { text-align: center; color: #475569; padding: 3rem; font-size: 0.9rem; }
 </style>
 </head>
@@ -79,7 +80,23 @@ function formatNow() {
 }
 
 function urgencyBadge(u) {
-  return `<span class="badge badge-${(u||'watch').toLowerCase()}">${u||'watch'}</span>`;
+  const urg = (u || 'watch').toLowerCase();
+  return `<span class="badge badge-${urg}">${urg}</span>`;
+}
+
+function formatDisclosureType(raw) {
+  if (!raw) return '';
+  if (raw.includes('1_05') || raw.includes('1.05')) return 'Item 1.05 — Material Cybersecurity Incident';
+  if (raw.includes('8_01') || raw.includes('8.01')) return 'Item 8.01 — Other Cybersecurity Event';
+  return raw;
+}
+
+function formatMateriality(raw) {
+  if (!raw) return '';
+  if (raw === 'material') return 'Material';
+  if (raw === 'not_material') return 'Not Material';
+  if (raw === 'undetermined') return 'Materiality Undetermined';
+  return raw;
 }
 
 function renderCard(a, isNew=false) {
@@ -88,14 +105,15 @@ function renderCard(a, isNew=false) {
   const summary = a.summary ?? '';
   const accession = a.accession ?? '';
   const filingUrl = a.filing_url ?? a.document_url ?? '';
-  const urgency = (a.urgency ?? 'watch').toLowerCase();
-  const dtype = (a.disclosure_type ?? '')
-    .replace('item_1_05','Item 1.05 — Material Cybersecurity Incident')
-    .replace('item_8_01','Item 8.01 — Other Cybersecurity Event');
-  const mat = a.materiality ?? '';
+  const urgency = a.urgency ?? 'watch';
+  const dtype = formatDisclosureType(a.disclosure_type ?? '');
+  const mat = formatMateriality(a.materiality ?? '');
   const rendered = a.rendered_text ?? '';
-  const exposures = Array.isArray(a.exposures) ? a.exposures.join(', ') : (a.exposures_json ?? '');
-  const filedAt = a.filed_at ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '';
+  const exposuresRaw = a.exposures ?? a.exposures_json ?? [];
+  const exposures = Array.isArray(exposuresRaw) ? exposuresRaw.join(', ') : exposuresRaw;
+  const filedAt = a.filed_at
+    ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})
+    : '';
   const newTag = isNew ? '<span class="new-badge">NEW</span>' : '';
 
   return `
@@ -131,7 +149,7 @@ function renderRows(rows, newAccessions=new Set()) {
 }
 
 async function runScan() {
-  setStatus('Scanning SEC EDGAR for Item 1.05 & 8.01 filings…', true);
+  setStatus('Scanning EDGAR for Item 1.05 & 8.01 filings…', true);
   document.getElementById('btn-scan').disabled = true;
   try {
     const r = await fetch(`${BASE}/api/scan`);
@@ -157,6 +175,7 @@ async function loadHistory() {
   } catch(e) { setStatus('Error: ' + e.message); }
 }
 
+// Auto-load on page open
 window.addEventListener('load', runScan);
 </script>
 </body>
