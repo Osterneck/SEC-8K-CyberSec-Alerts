@@ -7,14 +7,18 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Georgia, serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
-  header { background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+  header { background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
   header h1 { font-size: 1.1rem; font-weight: 600; color: #f0f4ff; }
-  header span { font-size: 0.75rem; background: #2a3550; color: #7ba4d9; padding: 2px 8px; border-radius: 4px; }
+  .mvp-badge { font-size: 0.75rem; background: #2a3550; color: #7ba4d9; padding: 2px 8px; border-radius: 4px; }
+  .live-indicator { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: #64748b; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
   main { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
-  .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+  .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .toolbar-left { display: flex; gap: 0.75rem; align-items: center; }
   button { cursor: pointer; font-size: 0.85rem; font-weight: 500; border: none; border-radius: 6px; padding: 0.5rem 1.1rem; transition: opacity .15s; }
   button:disabled { opacity: 0.45; cursor: not-allowed; }
-  #btn-demo { background: #334155; color: #cbd5e1; }
   #btn-scan { background: #1e40af; color: #dbeafe; }
   #btn-history { background: #1e3a2e; color: #86efac; }
   #status { font-size: 0.8rem; color: #64748b; }
@@ -23,104 +27,121 @@
   .badge-high     { background: #78350f; color: #fcd34d; }
   .badge-moderate { background: #1e3a8a; color: #93c5fd; }
   .badge-watch    { background: #1e3a2e; color: #86efac; }
-  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
-  .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+  .new-badge { font-size: 0.65rem; background: #166534; color: #bbf7d0; padding: 1px 6px; border-radius: 3px; margin-left: 0.4rem; vertical-align: middle; }
+  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+  .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
   .card-company { font-size: 1rem; font-weight: 600; color: #f0f4ff; }
-  .card-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 0.75rem; }
-  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; }
-  .score-bar { background: #2d3748; border-radius: 4px; height: 4px; margin-bottom: 0.5rem; }
-  .score-fill { height: 4px; border-radius: 4px; background: linear-gradient(90deg, #1e40af, #3b82f6); }
+  .card-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 0.6rem; }
+  .score-bar { background: #2d3748; border-radius: 4px; height: 4px; margin-bottom: 0.75rem; }
+  .score-fill { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#1e40af,#3b82f6); }
+  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; border-left: 3px solid #2d3748; padding-left: 0.75rem; }
   .card-links a { font-size: 0.78rem; color: #3b82f6; text-decoration: none; margin-right: 1rem; }
   .card-links a:hover { text-decoration: underline; }
-  .card-detail { font-size: 0.78rem; color: #475569; margin-top: 0.5rem; }
-  .card-detail summary { cursor: pointer; color: #64748b; }
-  .card-detail pre { margin-top: 0.5rem; white-space: pre-wrap; background: #0f1117; padding: 0.75rem; border-radius: 4px; font-size: 0.75rem; color: #94a3b8; }
+  .filing-text-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #475569; margin: 0.75rem 0 0.4rem; }
+  .filing-text { background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #94a3b8; white-space: pre-wrap; line-height: 1.65; max-height: 320px; overflow-y: auto; }
+  .exposures { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
   #empty { text-align: center; color: #475569; padding: 3rem; font-size: 0.9rem; }
 </style>
 </head>
 <body>
 <header>
-  <h1>SEC CyberSec Alerts</h1>
-  <span>MVP</span>
+  <div class="header-left">
+    <h1>SEC CyberSec Alerts</h1>
+    <span class="mvp-badge">MVP</span>
+  </div>
+  <div class="live-indicator">
+    <div class="live-dot"></div>
+    <span id="last-updated">Loading…</span>
+  </div>
 </header>
 <main>
   <div class="toolbar">
-    <button id="btn-demo" onclick="loadDemo()">Demo alerts</button>
-    <button id="btn-scan" onclick="runScan()">▶ Live scan</button>
-    <button id="btn-history" onclick="loadHistory()">History</button>
-    <span id="status"></span>
+    <div class="toolbar-left">
+      <button id="btn-scan" onclick="runScan()">▶ Refresh &amp; Scan</button>
+      <button id="btn-history" onclick="loadHistory()">History</button>
+      <span id="status"></span>
+    </div>
   </div>
-  <div id="alerts-container"><div id="empty">Select Demo, Live Scan, or History above.</div></div>
+  <div id="alerts-container"><div id="empty">Loading most recent alerts…</div></div>
 </main>
 <script>
 const BASE = '';
 const status = document.getElementById('status');
 const container = document.getElementById('alerts-container');
+const lastUpdated = document.getElementById('last-updated');
 
-function setStatus(msg, loading = false) {
+function setStatus(msg, loading=false) {
   status.textContent = loading ? '⏳ ' + msg : msg;
 }
 
-function urgencyBadge(u) {
-  return `<span class="badge badge-${u}">${u}</span>`;
+function formatNow() {
+  return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
 }
 
-function renderAlertCard(a) {
+function urgencyBadge(u) {
+  return `<span class="badge badge-${(u||'watch').toLowerCase()}">${u||'watch'}</span>`;
+}
+
+function renderCard(a, isNew=false) {
   const score = a.risk_score ?? 0;
-  const company = a.company_name ?? a.company ?? '—';
+  const company = a.company_name ?? '—';
   const summary = a.summary ?? '';
   const accession = a.accession ?? '';
   const filingUrl = a.filing_url ?? a.document_url ?? '';
-  const urgency = a.urgency ?? 'watch';
-  const dtype = (a.disclosure_type ?? '').replace('item_', 'Item ').replace('_', '.').replace('_material_cyber', ' — Material').replace('_other_cyber', ' — Other');
+  const urgency = (a.urgency ?? 'watch').toLowerCase();
+  const dtype = (a.disclosure_type ?? '')
+    .replace('item_1_05','Item 1.05 — Material Cybersecurity Incident')
+    .replace('item_8_01','Item 8.01 — Other Cybersecurity Event');
   const mat = a.materiality ?? '';
   const rendered = a.rendered_text ?? '';
-  const exposures = (a.exposures ?? []).join(', ');
+  const exposures = Array.isArray(a.exposures) ? a.exposures.join(', ') : (a.exposures_json ?? '');
+  const filedAt = a.filed_at ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '';
+  const newTag = isNew ? '<span class="new-badge">NEW</span>' : '';
+
   return `
-    <div class="card">
-      <div class="card-header">
-        ${urgencyBadge(urgency)}
-        <span class="card-company">${company}</span>
-        <span style="font-size:.75rem;color:#475569;margin-left:auto">Score: ${score}/100</span>
-      </div>
-      <div class="score-bar"><div class="score-fill" style="width:${score}%"></div></div>
-      <div class="card-meta">${dtype}${mat ? ' &nbsp;·&nbsp; ' + mat : ''}${accession ? ' &nbsp;·&nbsp; ' + accession : ''}</div>
-      <div class="card-summary">${summary || '—'}</div>
-      ${exposures ? `<div class="card-meta">Exposures: ${exposures}</div>` : ''}
-      <div class="card-links">
-        ${filingUrl ? `<a href="${filingUrl}" target="_blank">SEC filing ↗</a>` : ''}
-      </div>
-      ${rendered ? `<details class="card-detail"><summary>Full alert text</summary><pre>${rendered.replace(/</g,'&lt;')}</pre></details>` : ''}
-    </div>`;
+  <div class="card">
+    <div class="card-header">
+      ${urgencyBadge(urgency)}
+      <span class="card-company">${company}</span>${newTag}
+      <span style="font-size:.75rem;color:#475569;margin-left:auto">Score: ${score}/100</span>
+    </div>
+    <div class="score-bar"><div class="score-fill" style="width:${score}%"></div></div>
+    <div class="card-meta">
+      ${dtype}${mat ? ' &nbsp;·&nbsp; ' + mat : ''}
+      ${filedAt ? ' &nbsp;·&nbsp; Filed: ' + filedAt : ''}
+      ${accession ? ' &nbsp;·&nbsp; ' + accession : ''}
+    </div>
+    ${summary ? `<div class="card-summary">${summary}</div>` : ''}
+    ${exposures ? `<div class="exposures">Exposures: ${exposures}</div>` : ''}
+    <div class="card-links">
+      ${filingUrl ? `<a href="${filingUrl}" target="_blank">SEC filing ↗</a>` : ''}
+    </div>
+    ${rendered ? `
+    <div class="filing-text-label">Full Alert &amp; Filing Language</div>
+    <div class="filing-text">${rendered.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>` : ''}
+  </div>`;
 }
 
-function renderRows(rows) {
+function renderRows(rows, newAccessions=new Set()) {
   if (!rows || !rows.length) {
-    container.innerHTML = '<div id="empty">No alerts returned.</div>';
+    container.innerHTML = '<div id="empty">No qualifying cyber alerts found in the last 30 days.</div>';
     return;
   }
-  container.innerHTML = rows.map(renderAlertCard).join('');
-}
-
-async function loadDemo() {
-  setStatus('Loading demo…', true);
-  try {
-    const r = await fetch(`${BASE}/api/demo`);
-    const d = await r.json();
-    renderRows(d.alerts || []);
-    setStatus(`Demo · ${d.count} alert(s)`);
-  } catch(e) { setStatus('Error: ' + e.message); }
+  container.innerHTML = rows.map(a => renderCard(a, newAccessions.has(a.accession))).join('');
 }
 
 async function runScan() {
-  setStatus('Scanning SEC EDGAR…', true);
+  setStatus('Scanning SEC EDGAR for Item 1.05 & 8.01 filings…', true);
   document.getElementById('btn-scan').disabled = true;
   try {
     const r = await fetch(`${BASE}/api/scan`);
     if (!r.ok) { const t = await r.json(); throw new Error(t.detail || r.statusText); }
     const d = await r.json();
-    renderRows(d.alerts || []);
-    setStatus(`Live scan · ${d.new_alerts} new alert(s)`);
+    const newSet = new Set(d.new_alert_accessions ?? []);
+    renderRows(d.alerts || [], newSet);
+    const n = d.new_alerts ?? 0;
+    setStatus(n > 0 ? `${n} new filing(s) detected` : 'Up to date — showing most recent alerts');
+    lastUpdated.textContent = `Last updated: ${formatNow()}`;
   } catch(e) { setStatus('Error: ' + e.message); }
   finally { document.getElementById('btn-scan').disabled = false; }
 }
@@ -132,8 +153,11 @@ async function loadHistory() {
     const d = await r.json();
     renderRows(d.alerts || []);
     setStatus(`History · ${d.count} record(s)`);
+    lastUpdated.textContent = `Last updated: ${formatNow()}`;
   } catch(e) { setStatus('Error: ' + e.message); }
 }
+
+window.addEventListener('load', runScan);
 </script>
 </body>
 </html>
