@@ -1,9 +1,9 @@
-
 """SQLite persistence for filings, incidents, enforcement, and alerts."""
 
 from __future__ import annotations
 
 from contextlib import closing
+from typing import Any
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -247,11 +247,24 @@ class Store:
             )
             connection.commit()
 
-    def recent_alerts(self, limit: int = 20) -> list[sqlite3.Row]:
-        """Returns recent alert rows fully joined to filing and incident data."""
+    def recent_alerts(self, limit: int = 20, item_filter: str = "all") -> list[sqlite3.Row]:
+        """Returns recent alert rows fully joined to filing and incident data.
+
+        Args:
+            limit: Maximum rows to return.
+            item_filter: "all", "1.05", or "8.01" to filter by disclosure type.
+        """
+        filter_clause = ""
+        params: list[Any] = []
+        if item_filter == "1.05":
+            filter_clause = "AND INSTR(i.disclosure_type, '1_05') > 0"
+        elif item_filter == "8.01":
+            filter_clause = "AND INSTR(i.disclosure_type, '8_01') > 0"
+        params.append(max(1, limit))
+
         with closing(self._connect()) as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT
                     a.id,
                     a.accession,
@@ -273,10 +286,11 @@ class Store:
                 FROM alerts AS a
                 JOIN filings AS f ON f.accession = a.accession
                 LEFT JOIN incidents AS i ON i.accession = a.accession
-                ORDER BY a.id DESC
+                WHERE 1=1 {filter_clause}
+                ORDER BY f.filed_at DESC, a.id DESC
                 LIMIT ?
                 """,
-                (max(1, limit),),
+                params,
             ).fetchall()
         return list(rows)
 
