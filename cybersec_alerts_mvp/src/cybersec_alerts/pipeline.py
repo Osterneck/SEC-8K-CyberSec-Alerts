@@ -1,3 +1,4 @@
+
 """Alert pipeline orchestration."""
 
 from __future__ import annotations
@@ -40,11 +41,7 @@ class AlertPipeline:
         limit: int = 40,
         enforcement_pages: int = 3,
     ) -> list[str]:
-        """Runs one full filing and enforcement correlation cycle.
-
-        Returns:
-            Newly generated rendered alert bodies (strings) — for CLI use.
-        """
+        """Returns rendered alert strings — for CLI use."""
         alerts = self.run_once_structured(limit=limit, enforcement_pages=enforcement_pages)
         return [a.rendered_text for a in alerts]
 
@@ -53,14 +50,20 @@ class AlertPipeline:
         limit: int = 40,
         enforcement_pages: int = 3,
     ) -> list[Alert]:
-        """Runs one full filing and enforcement correlation cycle.
+        """Runs one full cycle using EFTS cyber filing search.
+
+        Searches EDGAR full-text for Item 1.05 and 8.01 filings from the
+        last 30 days, then classifies, scores, and stores qualifying alerts.
 
         Returns:
-            Newly generated Alert objects — for API/web use.
+            Newly generated Alert objects.
         """
         actions = self._safe_enforcement_fetch(enforcement_pages)
         self._process_enforcement_updates(actions)
-        entries = self._sec_client.list_current_8k(limit=limit)
+
+        # Use targeted cyber filing search instead of generic 8-K feed
+        entries = self._sec_client.search_cyber_filings(days_back=30, limit=limit)
+        LOGGER.info("EFTS cyber search returned %d entries", len(entries))
 
         alerts: list[Alert] = []
         for entry in entries:
@@ -179,14 +182,8 @@ def _render_enforcement_follow_up(
         ),
         "",
         "ACTION NOW",
-        (
-            "- Review the SEC action for cyber, controls, disclosure, "
-            "and scienter."
-        ),
-        (
-            "- Compare allegations and dates against the original "
-            "incident timeline."
-        ),
+        "- Review the SEC action for cyber, controls, disclosure, and scienter.",
+        "- Compare allegations and dates against the original incident timeline.",
         "- Reassess underwriting, litigation, and regulatory severity.",
         "- Check for parallel private litigation and other regulator activity.",
         "",
