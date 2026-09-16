@@ -21,37 +21,32 @@
   #btn-scan { background: #1e40af; color: #dbeafe; }
   #btn-history { background: #1e3a2e; color: #86efac; }
   #status { font-size: 0.8rem; color: #64748b; }
-  .tabs { display: flex; border-bottom: 2px solid #2d3748; margin-bottom: 1.25rem; gap: 0; }
+  .tabs { display: flex; border-bottom: 2px solid #2d3748; margin-bottom: 1.25rem; }
   .tab { cursor: pointer; font-size: 0.85rem; font-weight: 600; border: none; background: transparent; color: #64748b; padding: 0.6rem 1.25rem; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .15s; }
-  .tab:hover { color: #cbd5e1; }
-  .tab.active-all  { color: #93c5fd; border-bottom-color: #3b82f6; }
-  .tab.active-105  { color: #ddd6fe; border-bottom-color: #a855f7; }
-  .tab.active-801  { color: #a5f3fc; border-bottom-color: #06b6d4; }
+  .tab.active-all { color: #93c5fd; border-bottom-color: #3b82f6; }
+  .tab.active-105 { color: #ddd6fe; border-bottom-color: #a855f7; }
+  .tab.active-801 { color: #a5f3fc; border-bottom-color: #06b6d4; }
   .filter-banner { font-size: 0.78rem; padding: 0.5rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
-  .banner-all  { background: #1e3a5f33; color: #93c5fd; border-left: 3px solid #3b82f6; }
-  .banner-105  { background: #3b076433; color: #ddd6fe; border-left: 3px solid #a855f7; }
-  .banner-801  { background: #08334433; color: #a5f3fc; border-left: 3px solid #06b6d4; }
-  /* Summary row — clickable */
+  .banner-all { background: #1e3a5f33; color: #93c5fd; border-left: 3px solid #3b82f6; }
+  .banner-105 { background: #3b076433; color: #ddd6fe; border-left: 3px solid #a855f7; }
+  .banner-801 { background: #08334433; color: #a5f3fc; border-left: 3px solid #06b6d4; }
   .alert-row { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; margin-bottom: 0.6rem; overflow: hidden; cursor: pointer; transition: border-color .15s; }
   .alert-row:hover { border-color: #4a5568; }
-  .alert-row.open { border-color: #4a5568; }
   .alert-summary { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.25rem; flex-wrap: wrap; }
-  .alert-summary .chevron { margin-left: auto; color: #475569; font-size: 0.75rem; transition: transform .2s; }
+  .chevron { margin-left: auto; color: #475569; font-size: 0.75rem; transition: transform .2s; flex-shrink: 0; }
   .alert-row.open .chevron { transform: rotate(180deg); }
   .badge { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: .04em; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; flex-shrink: 0; }
   .badge-critical { background: #7f1d1d; color: #fca5a5; }
-  .badge-high     { background: #78350f; color: #fcd34d; }
+  .badge-high { background: #78350f; color: #fcd34d; }
   .badge-moderate { background: #1e3a8a; color: #93c5fd; }
-  .badge-watch    { background: #1e3a2e; color: #86efac; }
+  .badge-watch { background: #1e3a2e; color: #86efac; }
   .item-tag { font-size: 0.62rem; font-weight: 700; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
   .item-tag-105 { background: #4c1d95; color: #ddd6fe; }
   .item-tag-801 { background: #164e63; color: #a5f3fc; }
   .new-badge { font-size: 0.62rem; background: #166534; color: #bbf7d0; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
   .company-name { font-size: 0.95rem; font-weight: 600; color: #f0f4ff; }
-  .row-meta { font-size: 0.75rem; color: #64748b; margin-left: auto; white-space: nowrap; }
-  /* Score bar in summary */
   .score-mini { font-size: 0.7rem; color: #475569; flex-shrink: 0; }
-  /* Expanded detail panel */
+  .row-meta { font-size: 0.75rem; color: #64748b; white-space: nowrap; }
   .alert-detail { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid #2d3748; }
   .alert-row.open .alert-detail { display: block; }
   .detail-meta { font-size: 0.78rem; color: #64748b; margin: 0.75rem 0 0.5rem; }
@@ -82,126 +77,121 @@
 </header>
 <main>
   <div class="toolbar">
-    <button id="btn-scan" onclick="runScan()">▶ Refresh &amp; Scan</button>
+    <button id="btn-scan" onclick="runScan()">&#9654; Refresh &amp; Scan</button>
     <button id="btn-history" onclick="loadHistory()">History</button>
     <span id="status"></span>
   </div>
   <div class="tabs">
     <button class="tab active-all" id="tab-all" onclick="setFilter('all',this)">All Cyber Filings</button>
-    <button class="tab" id="tab-105" onclick="setFilter('1.05',this)">⚠ Item 1.05 — Material</button>
-    <button class="tab" id="tab-801" onclick="setFilter('8.01',this)">◎ Item 8.01 — Voluntary</button>
+    <button class="tab" id="tab-105" onclick="setFilter('1.05',this)">&#9888; Item 1.05 &#8212; Material</button>
+    <button class="tab" id="tab-801" onclick="setFilter('8.01',this)">&#9711; Item 8.01 &#8212; Voluntary</button>
   </div>
-  <div id="filter-banner" class="filter-banner banner-all">Showing all Item 1.05 and 8.01 cybersecurity filings · Click any row to expand</div>
-  <div id="alerts-container"><div id="empty">Loading most recent alerts…</div></div>
+  <div id="filter-banner" class="filter-banner banner-all">Showing all Item 1.05 and 8.01 cybersecurity filings &middot; Click any row to expand</div>
+  <div id="alerts-container"><div id="empty">Loading most recent alerts&hellip;</div></div>
 </main>
 <script>
-const BASE='', status=document.getElementById('status'), container=document.getElementById('alerts-container'), lastUpdated=document.getElementById('last-updated'), filterBanner=document.getElementById('filter-banner');
-let currentFilter='all', currentMode='scan';
-
-const META={
-  all: {bannerCls:'banner-all', bannerText:'Showing all Item 1.05 and 8.01 cybersecurity filings · Click any row to expand', scoreFill:'score-fill-all'},
-  '1.05':{bannerCls:'banner-105', bannerText:'⚠ Item 1.05 — Material Cybersecurity Incidents (mandatory SEC disclosure) · Click any row to expand', scoreFill:'score-fill-105'},
-  '8.01':{bannerCls:'banner-801', bannerText:'◎ Item 8.01 — Voluntary Cybersecurity Disclosures (non-material or undecided) · Click any row to expand', scoreFill:'score-fill-801'}
+var BASE='',status=document.getElementById('status'),container=document.getElementById('alerts-container'),lastUpdated=document.getElementById('last-updated'),filterBanner=document.getElementById('filter-banner');
+var currentFilter='all',currentMode='scan';
+var META={
+  'all':{bannerCls:'banner-all',bannerText:'Showing all Item 1.05 and 8.01 cybersecurity filings \u00b7 Click any row to expand',scoreFill:'score-fill-all'},
+  '1.05':{bannerCls:'banner-105',bannerText:'\u26a0 Item 1.05 \u2014 Material Cybersecurity Incidents (mandatory SEC disclosure) \u00b7 Click any row to expand',scoreFill:'score-fill-105'},
+  '8.01':{bannerCls:'banner-801',bannerText:'\u25ce Item 8.01 \u2014 Voluntary Cybersecurity Disclosures \u00b7 Click any row to expand',scoreFill:'score-fill-801'}
 };
-
-function setStatus(msg,loading=false){status.textContent=loading?'⏳ '+msg:msg;}
+function setStatus(msg,loading){status.textContent=loading?'\u23f3 '+msg:msg;}
 function formatNow(){return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});}
-
 function setFilter(f,el){
   currentFilter=f;
-  document.querySelectorAll('.tab').forEach(t=>t.className='tab');
-  el.className='tab active-'+({all:'all','1.05':'105','8.01':'801'}[f]);
-  const m=META[f];
+  document.querySelectorAll('.tab').forEach(function(t){t.className='tab';});
+  var cls={all:'active-all','1.05':'active-105','8.01':'active-801'}[f];
+  el.className='tab '+cls;
+  var m=META[f];
   filterBanner.className='filter-banner '+m.bannerCls;
   filterBanner.textContent=m.bannerText;
   if(currentMode==='history') loadHistory(); else runScan();
 }
-
 function itemTag(dtype){
   if(!dtype) return '';
-  if(dtype.includes('1_05')||dtype.includes('1.05')) return '<span class="item-tag item-tag-105">1.05</span>';
-  if(dtype.includes('8_01')||dtype.includes('8.01')) return '<span class="item-tag item-tag-801">8.01</span>';
+  if(dtype.indexOf('1_05')>-1||dtype.indexOf('1.05')>-1) return '<span class="item-tag item-tag-105">1.05</span>';
+  if(dtype.indexOf('8_01')>-1||dtype.indexOf('8.01')>-1) return '<span class="item-tag item-tag-801">8.01</span>';
   return '';
 }
-function urgencyBadge(u){return `<span class="badge badge-${(u||'watch').toLowerCase()}">${(u||'watch').toLowerCase()}</span>`;}
+function urgencyBadge(u){var urg=(u||'watch').toLowerCase();return '<span class="badge badge-'+urg+'">'+urg+'</span>';}
 function fmtMat(r){return {material:'Material',not_material:'Not Material',undetermined:'Undetermined'}[r]||r||'';}
 function fmtType(r){
   if(!r) return '';
-  if(r.includes('1_05')||r.includes('1.05')) return 'Item 1.05 — Material Cybersecurity Incident';
-  if(r.includes('8_01')||r.includes('8.01')) return 'Item 8.01 — Voluntary Cybersecurity Disclosure';
+  if(r.indexOf('1_05')>-1||r.indexOf('1.05')>-1) return 'Item 1.05 \u2014 Material Cybersecurity Incident';
+  if(r.indexOf('8_01')>-1||r.indexOf('8.01')>-1) return 'Item 8.01 \u2014 Voluntary Cybersecurity Disclosure';
   return r;
 }
 function fmtDate(s){return s?new Date(s).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}):''}
+function toggleRow(id){document.getElementById(id).classList.toggle('open');}
+function safe(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 
-function toggleRow(id){
-  const row=document.getElementById(id);
-  row.classList.toggle('open');
-}
-
-function renderRows(rows, newSet=new Set()){
+function renderRows(rows,newSet){
+  newSet=newSet||{};
   if(!rows||!rows.length){container.innerHTML='<div id="empty">No qualifying cyber alerts found for this filter.</div>';return;}
-  const fill=META[currentFilter].scoreFill;
-  container.innerHTML=rows.map((a,i)=>{
-    const id='row-'+i;
-    const score=a.risk_score??0;
-    const isNew=newSet.has(a.accession);
-    const filedAt=fmtDate(a.filed_at);
-    const dtype=fmtType(a.disclosure_type??'');
-    const mat=fmtMat(a.materiality??'');
-    const summary=a.summary??'';
-    const filingUrl=a.filing_url??a.document_url??'';
-    const rendered=a.rendered_text??'';
-    const exposuresRaw=a.exposures??a.exposures_json??[];
-    const exposures=Array.isArray(exposuresRaw)?exposuresRaw.join(', '):(typeof exposuresRaw==='string'?exposuresRaw:'');
-    return `
-    <div class="alert-row" id="${id}" onclick="toggleRow('${id}')">
-      <div class="alert-summary">
-        ${urgencyBadge(a.urgency??'watch')}
-        ${itemTag(a.disclosure_type)}
-        ${isNew?'<span class="new-badge">NEW</span>':''}
-        <span class="company-name">${a.company_name??'—'}</span>
-        <span class="score-mini">Score: ${score}/100</span>
-        <span class="row-meta">${filedAt}${a.accession?' · '+a.accession:''}</span>
-        <span class="chevron">▼</span>
-      </div>
-      <div class="alert-detail" onclick="event.stopPropagation()">
-        <div class="detail-meta">${dtype}${mat?' &nbsp;·&nbsp; '+mat:''}</div>
-        <div class="score-bar"><div class="${fill}" style="width:${score}%"></div></div>
-        ${summary?`<div class="card-summary">${summary}</div>`:''}
-        ${exposures?`<div class="exposures">Exposures: ${exposures}</div>`:''}
-        <div class="card-links">${filingUrl?`<a href="${filingUrl}" target="_blank">SEC filing ↗</a>`:''}</div>
-        ${rendered?`<div class="filing-text-label">Full Alert &amp; Filing Language</div><div class="filing-text">${rendered.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
+  var fill=META[currentFilter].scoreFill;
+  var html='';
+  for(var i=0;i<rows.length;i++){
+    var a=rows[i],id='row-'+i;
+    var score=a.risk_score||0;
+    var isNew=newSet[a.accession];
+    var filedAt=fmtDate(a.filed_at);
+    var exposuresRaw=a.exposures||a.exposures_json||[];
+    var exposures=Array.isArray(exposuresRaw)?exposuresRaw.join(', '):(typeof exposuresRaw==='string'?exposuresRaw:'');
+    var filingUrl=a.filing_url||a.document_url||'';
+    html+='<div class="alert-row" id="'+id+'" onclick="toggleRow(\''+id+'\')">'+
+      '<div class="alert-summary">'+
+        urgencyBadge(a.urgency||'watch')+
+        itemTag(a.disclosure_type)+
+        (isNew?'<span class="new-badge">NEW</span>':'')+
+        '<span class="company-name">'+safe(a.company_name||'\u2014')+'</span>'+
+        '<span class="score-mini">Score: '+score+'/100</span>'+
+        '<span class="row-meta">'+safe(filedAt)+(a.accession?' \u00b7 '+safe(a.accession):'')+'</span>'+
+        '<span class="chevron">\u25bc</span>'+
+      '</div>'+
+      '<div class="alert-detail" onclick="event.stopPropagation()">'+
+        '<div class="detail-meta">'+safe(fmtType(a.disclosure_type||''))+(a.materiality?' &nbsp;&middot;&nbsp; '+safe(fmtMat(a.materiality)):'')+'</div>'+
+        '<div class="score-bar"><div class="'+fill+'" style="width:'+score+'%"></div></div>'+
+        (a.summary?'<div class="card-summary">'+safe(a.summary)+'</div>':'')+
+        (exposures?'<div class="exposures">Exposures: '+safe(exposures)+'</div>':'')+
+        '<div class="card-links">'+(filingUrl?'<a href="'+safe(filingUrl)+'" target="_blank">SEC filing \u2197</a>':'')+'</div>'+
+        (a.rendered_text?'<div class="filing-text-label">Full Alert &amp; Filing Language</div><div class="filing-text">'+safe(a.rendered_text)+'</div>':'')+
+      '</div>'+
+    '</div>';
+  }
+  container.innerHTML=html;
 }
 
-async function runScan(){
+function runScan(){
   currentMode='scan';
-  setStatus('Scanning EDGAR for Item 1.05 & 8.01 filings…',true);
+  setStatus('Scanning EDGAR for Item 1.05 & 8.01 filings\u2026',true);
   document.getElementById('btn-scan').disabled=true;
-  try{
-    const r=await fetch(`${BASE}/api/scan?item=${encodeURIComponent(currentFilter)}`);
-    if(!r.ok){const t=await r.json();throw new Error(t.detail||r.statusText);}
-    const d=await r.json();
-    renderRows(d.alerts||[],new Set(d.new_alert_accessions??[]));
-    const n=d.new_alerts??0;
-    setStatus(n>0?`${n} new filing(s) detected`:'Up to date — showing most recent alerts');
-    lastUpdated.textContent=`Last updated: ${formatNow()}`;
-  }catch(e){setStatus('Error: '+e.message);}
-  finally{document.getElementById('btn-scan').disabled=false;}
+  fetch(BASE+'/api/scan?item='+encodeURIComponent(currentFilter))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var newSet={};
+      (d.new_alert_accessions||[]).forEach(function(a){newSet[a]=true;});
+      renderRows(d.alerts||[],newSet);
+      var n=d.new_alerts||0;
+      setStatus(n>0?n+' new filing(s) detected':'Up to date \u2014 showing most recent alerts');
+      lastUpdated.textContent='Last updated: '+formatNow();
+    })
+    .catch(function(e){setStatus('Error: '+e.message);})
+    .finally(function(){document.getElementById('btn-scan').disabled=false;});
 }
 
-async function loadHistory(){
+function loadHistory(){
   currentMode='history';
-  setStatus('Loading history…',true);
-  try{
-    const r=await fetch(`${BASE}/api/history?limit=50&item=${encodeURIComponent(currentFilter)}`);
-    const d=await r.json();
-    renderRows(d.alerts||[]);
-    setStatus(`History · ${d.count} record(s)`);
-    lastUpdated.textContent=`Last updated: ${formatNow()}`;
-  }catch(e){setStatus('Error: '+e.message);}
+  setStatus('Loading history\u2026',true);
+  fetch(BASE+'/api/history?limit=50&item='+encodeURIComponent(currentFilter))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      renderRows(d.alerts||[]);
+      setStatus('History \u00b7 '+d.count+' record(s)');
+      lastUpdated.textContent='Last updated: '+formatNow();
+    })
+    .catch(function(e){setStatus('Error: '+e.message);});
 }
 
 window.addEventListener('load',runScan);
