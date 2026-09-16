@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,11 +17,14 @@
   @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
   main { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
   .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-  .toolbar-left { display: flex; gap: 0.75rem; align-items: center; }
+  .toolbar-left { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   button { cursor: pointer; font-size: 0.85rem; font-weight: 500; border: none; border-radius: 6px; padding: 0.5rem 1.1rem; transition: opacity .15s; }
   button:disabled { opacity: 0.45; cursor: not-allowed; }
   #btn-scan { background: #1e40af; color: #dbeafe; }
   #btn-history { background: #1e3a2e; color: #86efac; }
+  .tab-group { display: flex; gap: 0.4rem; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 6px; padding: 3px; }
+  .tab { cursor: pointer; font-size: 0.8rem; font-weight: 500; border: none; border-radius: 4px; padding: 0.35rem 0.85rem; background: transparent; color: #64748b; transition: all .15s; }
+  .tab.active { background: #2a3550; color: #f0f4ff; }
   #status { font-size: 0.8rem; color: #64748b; }
   .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
   .badge-critical { background: #7f1d1d; color: #fca5a5; }
@@ -28,6 +32,9 @@
   .badge-moderate { background: #1e3a8a; color: #93c5fd; }
   .badge-watch    { background: #1e3a2e; color: #86efac; }
   .new-badge { font-size: 0.65rem; background: #166534; color: #bbf7d0; padding: 1px 6px; border-radius: 3px; margin-left: 0.4rem; vertical-align: middle; }
+  .item-tag { font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-left: 0.4rem; vertical-align: middle; }
+  .item-tag-105 { background: #4c1d95; color: #ddd6fe; }
+  .item-tag-801 { background: #164e63; color: #a5f3fc; }
   .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
   .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
   .card-company { font-size: 1rem; font-weight: 600; color: #f0f4ff; }
@@ -60,6 +67,11 @@
     <div class="toolbar-left">
       <button id="btn-scan" onclick="runScan()">▶ Refresh &amp; Scan</button>
       <button id="btn-history" onclick="loadHistory()">History</button>
+      <div class="tab-group">
+        <button class="tab active" onclick="setFilter('all', this)">All</button>
+        <button class="tab" onclick="setFilter('1.05', this)">Item 1.05</button>
+        <button class="tab" onclick="setFilter('8.01', this)">Item 8.01</button>
+      </div>
       <span id="status"></span>
     </div>
   </div>
@@ -70,6 +82,8 @@ const BASE = '';
 const status = document.getElementById('status');
 const container = document.getElementById('alerts-container');
 const lastUpdated = document.getElementById('last-updated');
+let currentFilter = 'all';
+let currentMode = 'scan'; // 'scan' or 'history'
 
 function setStatus(msg, loading=false) {
   status.textContent = loading ? '⏳ ' + msg : msg;
@@ -79,9 +93,26 @@ function formatNow() {
   return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
 }
 
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (currentMode === 'history') loadHistory();
+  else runScan();
+}
+
 function urgencyBadge(u) {
   const urg = (u || 'watch').toLowerCase();
   return `<span class="badge badge-${urg}">${urg}</span>`;
+}
+
+function itemTag(dtype) {
+  if (!dtype) return '';
+  if (dtype.includes('1_05') || dtype.includes('1.05'))
+    return '<span class="item-tag item-tag-105">1.05</span>';
+  if (dtype.includes('8_01') || dtype.includes('8.01'))
+    return '<span class="item-tag item-tag-801">8.01</span>';
+  return '';
 }
 
 function formatDisclosureType(raw) {
@@ -109,7 +140,7 @@ function renderCard(a, isNew=false) {
   const dtype = formatDisclosureType(a.disclosure_type ?? '');
   const mat = formatMateriality(a.materiality ?? '');
   const rendered = a.rendered_text ?? '';
-  const exposuresRaw = a.exposures ?? a.exposures_json ?? [];
+  const exposuresRaw = a.exposures ?? [];
   const exposures = Array.isArray(exposuresRaw) ? exposuresRaw.join(', ') : exposuresRaw;
   const filedAt = a.filed_at
     ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})
@@ -120,7 +151,8 @@ function renderCard(a, isNew=false) {
   <div class="card">
     <div class="card-header">
       ${urgencyBadge(urgency)}
-      <span class="card-company">${company}</span>${newTag}
+      <span class="card-company">${company}</span>
+      ${itemTag(a.disclosure_type)}${newTag}
       <span style="font-size:.75rem;color:#475569;margin-left:auto">Score: ${score}/100</span>
     </div>
     <div class="score-bar"><div class="score-fill" style="width:${score}%"></div></div>
@@ -142,17 +174,18 @@ function renderCard(a, isNew=false) {
 
 function renderRows(rows, newAccessions=new Set()) {
   if (!rows || !rows.length) {
-    container.innerHTML = '<div id="empty">No qualifying cyber alerts found in the last 30 days.</div>';
+    container.innerHTML = '<div id="empty">No qualifying cyber alerts found for this filter.</div>';
     return;
   }
   container.innerHTML = rows.map(a => renderCard(a, newAccessions.has(a.accession))).join('');
 }
 
 async function runScan() {
+  currentMode = 'scan';
   setStatus('Scanning EDGAR for Item 1.05 & 8.01 filings…', true);
   document.getElementById('btn-scan').disabled = true;
   try {
-    const r = await fetch(`${BASE}/api/scan`);
+    const r = await fetch(`${BASE}/api/scan?item=${encodeURIComponent(currentFilter)}`);
     if (!r.ok) { const t = await r.json(); throw new Error(t.detail || r.statusText); }
     const d = await r.json();
     const newSet = new Set(d.new_alert_accessions ?? []);
@@ -165,9 +198,10 @@ async function runScan() {
 }
 
 async function loadHistory() {
+  currentMode = 'history';
   setStatus('Loading history…', true);
   try {
-    const r = await fetch(`${BASE}/api/history?limit=50`);
+    const r = await fetch(`${BASE}/api/history?limit=50&item=${encodeURIComponent(currentFilter)}`);
     const d = await r.json();
     renderRows(d.alerts || []);
     setStatus(`History · ${d.count} record(s)`);
@@ -175,7 +209,6 @@ async function loadHistory() {
   } catch(e) { setStatus('Error: ' + e.message); }
 }
 
-// Auto-load on page open
 window.addEventListener('load', runScan);
 </script>
 </body>
