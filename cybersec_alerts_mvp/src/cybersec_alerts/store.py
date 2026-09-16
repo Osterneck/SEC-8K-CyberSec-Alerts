@@ -1,3 +1,4 @@
+
 """SQLite persistence for filings, incidents, enforcement, and alerts."""
 
 from __future__ import annotations
@@ -88,7 +89,6 @@ class Store:
             connection.commit()
 
     def seen(self, accession: str) -> bool:
-        """Returns whether a filing accession already exists."""
         with closing(self._connect()) as connection:
             row = connection.execute(
                 "SELECT 1 FROM filings WHERE accession = ? LIMIT 1",
@@ -97,7 +97,6 @@ class Store:
         return row is not None
 
     def save_filing(self, filing: SecFiling) -> None:
-        """Persists a filing if it has not already been stored."""
         with closing(self._connect()) as connection:
             connection.execute(
                 """
@@ -121,7 +120,6 @@ class Store:
             connection.commit()
 
     def save_incident(self, incident: CyberIncident) -> None:
-        """Persists a classified/scored incident."""
         with closing(self._connect()) as connection:
             connection.execute(
                 """
@@ -145,7 +143,6 @@ class Store:
             connection.commit()
 
     def save_alert(self, alert: Alert) -> None:
-        """Persists a filing-triggered alert."""
         enforcement = [
             {
                 "title": action.title,
@@ -171,7 +168,6 @@ class Store:
         enforcement: list[dict[str, str]],
         created_at: str | None = None,
     ) -> None:
-        """Persists a generic rendered alert."""
         with closing(self._connect()) as connection:
             connection.execute(
                 """
@@ -191,7 +187,6 @@ class Store:
             connection.commit()
 
     def tracked_incidents(self) -> list[sqlite3.Row]:
-        """Returns issuers and accessions with classified cyber incidents."""
         with closing(self._connect()) as connection:
             rows = connection.execute(
                 """
@@ -211,7 +206,6 @@ class Store:
         return list(rows)
 
     def save_enforcement_action(self, action: EnforcementAction) -> None:
-        """Persists an observed SEC enforcement action."""
         with closing(self._connect()) as connection:
             connection.execute(
                 """
@@ -229,17 +223,11 @@ class Store:
             )
             connection.commit()
 
-    def enforcement_link_exists(
-        self,
-        action_url: str,
-        accession: str,
-    ) -> bool:
-        """Returns whether an action was already linked to an incident."""
+    def enforcement_link_exists(self, action_url: str, accession: str) -> bool:
         with closing(self._connect()) as connection:
             row = connection.execute(
                 """
-                SELECT 1
-                FROM enforcement_links
+                SELECT 1 FROM enforcement_links
                 WHERE enforcement_url = ? AND accession = ?
                 LIMIT 1
                 """,
@@ -247,12 +235,7 @@ class Store:
             ).fetchone()
         return row is not None
 
-    def save_enforcement_link(
-        self,
-        action_url: str,
-        accession: str,
-    ) -> None:
-        """Persists a longitudinal enforcement-to-filing link."""
+    def save_enforcement_link(self, action_url: str, accession: str) -> None:
         with closing(self._connect()) as connection:
             connection.execute(
                 """
@@ -265,7 +248,7 @@ class Store:
             connection.commit()
 
     def recent_alerts(self, limit: int = 20) -> list[sqlite3.Row]:
-        """Returns recent alert rows joined to issuer metadata."""
+        """Returns recent alert rows fully joined to filing and incident data."""
         with closing(self._connect()) as connection:
             rows = connection.execute(
                 """
@@ -273,11 +256,23 @@ class Store:
                     a.id,
                     a.accession,
                     a.alert_type,
-                    f.company_name,
                     a.rendered_text,
-                    a.created_at
+                    a.enforcement_json,
+                    a.created_at,
+                    f.company_name,
+                    f.filing_url,
+                    f.document_url,
+                    f.filed_at,
+                    i.disclosure_type,
+                    i.materiality,
+                    i.risk_score,
+                    i.urgency,
+                    i.summary,
+                    i.exposures_json,
+                    i.signals_json
                 FROM alerts AS a
                 JOIN filings AS f ON f.accession = a.accession
+                LEFT JOIN incidents AS i ON i.accession = a.accession
                 ORDER BY a.id DESC
                 LIMIT ?
                 """,
