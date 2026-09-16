@@ -13,54 +13,37 @@
   .mvp-badge { font-size: 0.75rem; background: #2a3550; color: #7ba4d9; padding: 2px 8px; border-radius: 4px; }
   .live-indicator { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: #64748b; }
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
   main { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
-  .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+  .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .toolbar-left { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
   button { cursor: pointer; font-size: 0.85rem; font-weight: 500; border: none; border-radius: 6px; padding: 0.5rem 1.1rem; transition: opacity .15s; }
   button:disabled { opacity: 0.45; cursor: not-allowed; }
   #btn-scan { background: #1e40af; color: #dbeafe; }
   #btn-history { background: #1e3a2e; color: #86efac; }
   #status { font-size: 0.8rem; color: #64748b; }
-  .tabs { display: flex; border-bottom: 2px solid #2d3748; margin-bottom: 1.25rem; }
-  .tab { cursor: pointer; font-size: 0.85rem; font-weight: 600; border: none; background: transparent; color: #64748b; padding: 0.6rem 1.25rem; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .15s; }
-  .tab.active-all { color: #93c5fd; border-bottom-color: #3b82f6; }
-  .tab.active-105 { color: #ddd6fe; border-bottom-color: #a855f7; }
-  .tab.active-801 { color: #a5f3fc; border-bottom-color: #06b6d4; }
-  .filter-banner { font-size: 0.78rem; padding: 0.5rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
-  .banner-all { background: #1e3a5f33; color: #93c5fd; border-left: 3px solid #3b82f6; }
-  .banner-105 { background: #3b076433; color: #ddd6fe; border-left: 3px solid #a855f7; }
-  .banner-801 { background: #08334433; color: #a5f3fc; border-left: 3px solid #06b6d4; }
-  .alert-row { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; margin-bottom: 0.6rem; overflow: hidden; cursor: pointer; transition: border-color .15s; }
-  .alert-row:hover { border-color: #4a5568; }
-  .alert-summary { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.25rem; flex-wrap: wrap; }
-  .chevron { margin-left: auto; color: #475569; font-size: 0.75rem; transition: transform .2s; flex-shrink: 0; }
-  .alert-row.open .chevron { transform: rotate(180deg); }
-  .badge { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: .04em; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; flex-shrink: 0; }
+  .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
   .badge-critical { background: #7f1d1d; color: #fca5a5; }
-  .badge-high { background: #78350f; color: #fcd34d; }
+  .badge-high     { background: #78350f; color: #fcd34d; }
   .badge-moderate { background: #1e3a8a; color: #93c5fd; }
-  .badge-watch { background: #1e3a2e; color: #86efac; }
-  .item-tag { font-size: 0.62rem; font-weight: 700; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+  .badge-watch    { background: #1e3a2e; color: #86efac; }
+  .new-badge { font-size: 0.65rem; background: #166534; color: #bbf7d0; padding: 1px 6px; border-radius: 3px; margin-left: 0.4rem; vertical-align: middle; }
+  .item-tag { font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; }
   .item-tag-105 { background: #4c1d95; color: #ddd6fe; }
   .item-tag-801 { background: #164e63; color: #a5f3fc; }
-  .new-badge { font-size: 0.62rem; background: #166534; color: #bbf7d0; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
-  .company-name { font-size: 0.95rem; font-weight: 600; color: #f0f4ff; }
-  .score-mini { font-size: 0.7rem; color: #475569; flex-shrink: 0; }
-  .row-meta { font-size: 0.75rem; color: #64748b; white-space: nowrap; }
-  .alert-detail { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid #2d3748; }
-  .alert-row.open .alert-detail { display: block; }
-  .detail-meta { font-size: 0.78rem; color: #64748b; margin: 0.75rem 0 0.5rem; }
+  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+  .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .card-company { font-size: 1rem; font-weight: 600; color: #f0f4ff; }
+  .card-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 0.6rem; }
   .score-bar { background: #2d3748; border-radius: 4px; height: 4px; margin-bottom: 0.75rem; }
-  .score-fill-all { height:4px; border-radius:4px; background: linear-gradient(90deg,#1e40af,#3b82f6); }
-  .score-fill-105 { height:4px; border-radius:4px; background: linear-gradient(90deg,#6b21a8,#a855f7); }
-  .score-fill-801 { height:4px; border-radius:4px; background: linear-gradient(90deg,#0e7490,#06b6d4); }
-  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; border-left: 3px solid #334155; padding-left: 0.75rem; }
-  .exposures { font-size: 0.75rem; color: #64748b; margin-bottom: 0.6rem; }
-  .card-links { margin-bottom: 0.75rem; }
+  .score-fill { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#1e40af,#3b82f6); }
+  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; border-left: 3px solid #3b82f6; padding-left: 0.75rem; }
+  .card-links { margin-bottom: 0.5rem; }
   .card-links a { font-size: 0.78rem; color: #3b82f6; text-decoration: none; margin-right: 1rem; }
   .card-links a:hover { text-decoration: underline; }
-  .filing-text-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #475569; margin-bottom: 0.4rem; }
-  .filing-text { background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 0.85rem 1rem; font-size: 0.76rem; color: #94a3b8; white-space: pre-wrap; line-height: 1.65; max-height: 400px; overflow-y: auto; }
+  .exposures { font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; }
+  .filing-text-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #475569; margin: 0.75rem 0 0.4rem; }
+  .filing-text { background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #94a3b8; white-space: pre-wrap; line-height: 1.65; max-height: 320px; overflow-y: auto; }
   #empty { text-align: center; color: #475569; padding: 3rem; font-size: 0.9rem; }
 </style>
 </head>
@@ -72,129 +55,138 @@
   </div>
   <div class="live-indicator">
     <div class="live-dot"></div>
-    <span id="last-updated">Loading…</span>
+    <span id="last-updated">Loading...</span>
   </div>
 </header>
 <main>
   <div class="toolbar">
-    <button id="btn-scan" onclick="runScan()">&#9654; Refresh &amp; Scan</button>
-    <button id="btn-history" onclick="loadHistory()">History</button>
-    <span id="status"></span>
+    <div class="toolbar-left">
+      <button id="btn-scan" onclick="runScan()">&#9654; Refresh &amp; Scan</button>
+      <button id="btn-history" onclick="loadHistory()">History</button>
+      <span id="status"></span>
+    </div>
   </div>
-  <div class="tabs">
-    <button class="tab active-all" id="tab-all" onclick="setFilter('all',this)">All Cyber Filings</button>
-    <button class="tab" id="tab-105" onclick="setFilter('1.05',this)">&#9888; Item 1.05 &#8212; Material</button>
-    <button class="tab" id="tab-801" onclick="setFilter('8.01',this)">&#9711; Item 8.01 &#8212; Voluntary</button>
-  </div>
-  <div id="filter-banner" class="filter-banner banner-all">Showing all Item 1.05 and 8.01 cybersecurity filings &middot; Click any row to expand</div>
-  <div id="alerts-container"><div id="empty">Loading most recent alerts&hellip;</div></div>
+  <div id="alerts-container"><div id="empty">Loading most recent alerts...</div></div>
 </main>
 <script>
-var BASE='',status=document.getElementById('status'),container=document.getElementById('alerts-container'),lastUpdated=document.getElementById('last-updated'),filterBanner=document.getElementById('filter-banner');
-var currentFilter='all',currentMode='scan';
-var META={
-  'all':{bannerCls:'banner-all',bannerText:'Showing all Item 1.05 and 8.01 cybersecurity filings \u00b7 Click any row to expand',scoreFill:'score-fill-all'},
-  '1.05':{bannerCls:'banner-105',bannerText:'\u26a0 Item 1.05 \u2014 Material Cybersecurity Incidents (mandatory SEC disclosure) \u00b7 Click any row to expand',scoreFill:'score-fill-105'},
-  '8.01':{bannerCls:'banner-801',bannerText:'\u25ce Item 8.01 \u2014 Voluntary Cybersecurity Disclosures \u00b7 Click any row to expand',scoreFill:'score-fill-801'}
-};
-function setStatus(msg,loading){status.textContent=loading?'\u23f3 '+msg:msg;}
-function formatNow(){return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});}
-function setFilter(f,el){
-  currentFilter=f;
-  document.querySelectorAll('.tab').forEach(function(t){t.className='tab';});
-  var cls={all:'active-all','1.05':'active-105','8.01':'active-801'}[f];
-  el.className='tab '+cls;
-  var m=META[f];
-  filterBanner.className='filter-banner '+m.bannerCls;
-  filterBanner.textContent=m.bannerText;
-  if(currentMode==='history') loadHistory(); else runScan();
+var BASE = '';
+var status = document.getElementById('status');
+var container = document.getElementById('alerts-container');
+var lastUpdated = document.getElementById('last-updated');
+
+function setStatus(msg, loading) {
+  status.textContent = loading ? '... ' + msg : msg;
 }
-function itemTag(dtype){
-  if(!dtype) return '';
-  if(dtype.indexOf('1_05')>-1||dtype.indexOf('1.05')>-1) return '<span class="item-tag item-tag-105">1.05</span>';
-  if(dtype.indexOf('8_01')>-1||dtype.indexOf('8.01')>-1) return '<span class="item-tag item-tag-801">8.01</span>';
+
+function formatNow() {
+  return new Date().toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+function safe(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+}
+
+function urgencyBadge(u) {
+  var urg = (u || 'watch').toLowerCase();
+  return '<span class="badge badge-' + urg + '">' + urg + '</span>';
+}
+
+function itemTag(dtype) {
+  if (!dtype) return '';
+  if (dtype.indexOf('1_05') > -1 || dtype.indexOf('1.05') > -1) return '<span class="item-tag item-tag-105">1.05</span>';
+  if (dtype.indexOf('8_01') > -1 || dtype.indexOf('8.01') > -1) return '<span class="item-tag item-tag-801">8.01</span>';
   return '';
 }
-function urgencyBadge(u){var urg=(u||'watch').toLowerCase();return '<span class="badge badge-'+urg+'">'+urg+'</span>';}
-function fmtMat(r){return {material:'Material',not_material:'Not Material',undetermined:'Undetermined'}[r]||r||'';}
-function fmtType(r){
-  if(!r) return '';
-  if(r.indexOf('1_05')>-1||r.indexOf('1.05')>-1) return 'Item 1.05 \u2014 Material Cybersecurity Incident';
-  if(r.indexOf('8_01')>-1||r.indexOf('8.01')>-1) return 'Item 8.01 \u2014 Voluntary Cybersecurity Disclosure';
-  return r;
-}
-function fmtDate(s){return s?new Date(s).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}):''}
-function toggleRow(id){document.getElementById(id).classList.toggle('open');}
-function safe(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 
-function renderRows(rows,newSet){
-  newSet=newSet||{};
-  if(!rows||!rows.length){container.innerHTML='<div id="empty">No qualifying cyber alerts found for this filter.</div>';return;}
-  var fill=META[currentFilter].scoreFill;
-  var html='';
-  for(var i=0;i<rows.length;i++){
-    var a=rows[i],id='row-'+i;
-    var score=a.risk_score||0;
-    var isNew=newSet[a.accession];
-    var filedAt=fmtDate(a.filed_at);
-    var exposuresRaw=a.exposures||a.exposures_json||[];
-    var exposures=Array.isArray(exposuresRaw)?exposuresRaw.join(', '):(typeof exposuresRaw==='string'?exposuresRaw:'');
-    var filingUrl=a.filing_url||a.document_url||'';
-    html+='<div class="alert-row" id="'+id+'" onclick="toggleRow(\''+id+'\')">'+
-      '<div class="alert-summary">'+
-        urgencyBadge(a.urgency||'watch')+
-        itemTag(a.disclosure_type)+
-        (isNew?'<span class="new-badge">NEW</span>':'')+
-        '<span class="company-name">'+safe(a.company_name||'\u2014')+'</span>'+
-        '<span class="score-mini">Score: '+score+'/100</span>'+
-        '<span class="row-meta">'+safe(filedAt)+(a.accession?' \u00b7 '+safe(a.accession):'')+'</span>'+
-        '<span class="chevron">\u25bc</span>'+
-      '</div>'+
-      '<div class="alert-detail" onclick="event.stopPropagation()">'+
-        '<div class="detail-meta">'+safe(fmtType(a.disclosure_type||''))+(a.materiality?' &nbsp;&middot;&nbsp; '+safe(fmtMat(a.materiality)):'')+'</div>'+
-        '<div class="score-bar"><div class="'+fill+'" style="width:'+score+'%"></div></div>'+
-        (a.summary?'<div class="card-summary">'+safe(a.summary)+'</div>':'')+
-        (exposures?'<div class="exposures">Exposures: '+safe(exposures)+'</div>':'')+
-        '<div class="card-links">'+(filingUrl?'<a href="'+safe(filingUrl)+'" target="_blank">SEC filing \u2197</a>':'')+'</div>'+
-        (a.rendered_text?'<div class="filing-text-label">Full Alert &amp; Filing Language</div><div class="filing-text">'+safe(a.rendered_text)+'</div>':'')+
-      '</div>'+
+function formatDisclosureType(raw) {
+  if (!raw) return '';
+  if (raw.indexOf('1_05') > -1 || raw.indexOf('1.05') > -1) return 'Item 1.05 - Material Cybersecurity Incident';
+  if (raw.indexOf('8_01') > -1 || raw.indexOf('8.01') > -1) return 'Item 8.01 - Voluntary Cybersecurity Disclosure';
+  return raw;
+}
+
+function formatMateriality(raw) {
+  if (!raw) return '';
+  if (raw === 'material') return 'Material';
+  if (raw === 'not_material') return 'Not Material';
+  if (raw === 'undetermined') return 'Materiality Undetermined';
+  return raw;
+}
+
+function renderCard(a, isNew) {
+  var score = a.risk_score || 0;
+  var company = a.company_name || '-';
+  var summary = a.summary || '';
+  var accession = a.accession || '';
+  var filingUrl = a.filing_url || a.document_url || '';
+  var urgency = a.urgency || 'watch';
+  var dtype = formatDisclosureType(a.disclosure_type || '');
+  var mat = formatMateriality(a.materiality || '');
+  var rendered = a.rendered_text || '';
+  var exposuresRaw = a.exposures || a.exposures_json || [];
+  var exposures = Array.isArray(exposuresRaw) ? exposuresRaw.join(', ') : (typeof exposuresRaw === 'string' ? exposuresRaw : '');
+  var filedAt = a.filed_at ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '';
+  var newTag = isNew ? '<span class="new-badge">NEW</span>' : '';
+
+  return '<div class="card">' +
+    '<div class="card-header">' +
+      urgencyBadge(urgency) +
+      itemTag(a.disclosure_type) +
+      '<span class="card-company">' + safe(company) + '</span>' + newTag +
+      '<span style="font-size:.75rem;color:#475569;margin-left:auto">Score: ' + score + '/100</span>' +
+    '</div>' +
+    '<div class="score-bar"><div class="score-fill" style="width:' + score + '%"></div></div>' +
+    '<div class="card-meta">' + safe(dtype) + (mat ? ' &nbsp;&middot;&nbsp; ' + safe(mat) : '') + (filedAt ? ' &nbsp;&middot;&nbsp; Filed: ' + safe(filedAt) : '') + (accession ? ' &nbsp;&middot;&nbsp; ' + safe(accession) : '') + '</div>' +
+    (summary ? '<div class="card-summary">' + safe(summary) + '</div>' : '') +
+    (exposures ? '<div class="exposures">Exposures: ' + safe(exposures) + '</div>' : '') +
+    '<div class="card-links">' + (filingUrl ? '<a href="' + safe(filingUrl) + '" target="_blank">SEC filing</a>' : '') + '</div>' +
+    (rendered ? '<div class="filing-text-label">Full Alert &amp; Filing Language</div><div class="filing-text">' + safe(rendered) + '</div>' : '') +
     '</div>';
+}
+
+function renderRows(rows, newAccessions) {
+  newAccessions = newAccessions || {};
+  if (!rows || !rows.length) {
+    container.innerHTML = '<div id="empty">No qualifying cyber alerts found.</div>';
+    return;
   }
-  container.innerHTML=html;
+  var html = '';
+  for (var i = 0; i < rows.length; i++) {
+    html += renderCard(rows[i], newAccessions[rows[i].accession]);
+  }
+  container.innerHTML = html;
 }
 
-function runScan(){
-  currentMode='scan';
-  setStatus('Scanning EDGAR for Item 1.05 & 8.01 filings\u2026',true);
-  document.getElementById('btn-scan').disabled=true;
-  fetch(BASE+'/api/scan?item='+encodeURIComponent(currentFilter))
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var newSet={};
-      (d.new_alert_accessions||[]).forEach(function(a){newSet[a]=true;});
-      renderRows(d.alerts||[],newSet);
-      var n=d.new_alerts||0;
-      setStatus(n>0?n+' new filing(s) detected':'Up to date \u2014 showing most recent alerts');
-      lastUpdated.textContent='Last updated: '+formatNow();
+function runScan() {
+  setStatus('Scanning EDGAR for Item 1.05 & 8.01 filings...', true);
+  document.getElementById('btn-scan').disabled = true;
+  fetch(BASE + '/api/scan')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var newSet = {};
+      (d.new_alert_accessions || []).forEach(function(a) { newSet[a] = true; });
+      renderRows(d.alerts || [], newSet);
+      var n = d.new_alerts || 0;
+      setStatus(n > 0 ? n + ' new filing(s) detected' : 'Up to date - showing most recent alerts');
+      lastUpdated.textContent = 'Last updated: ' + formatNow();
     })
-    .catch(function(e){setStatus('Error: '+e.message);})
-    .finally(function(){document.getElementById('btn-scan').disabled=false;});
+    .catch(function(e) { setStatus('Error: ' + e.message); })
+    .finally(function() { document.getElementById('btn-scan').disabled = false; });
 }
 
-function loadHistory(){
-  currentMode='history';
-  setStatus('Loading history\u2026',true);
-  fetch(BASE+'/api/history?limit=50&item='+encodeURIComponent(currentFilter))
-    .then(function(r){return r.json();})
-    .then(function(d){
-      renderRows(d.alerts||[]);
-      setStatus('History \u00b7 '+d.count+' record(s)');
-      lastUpdated.textContent='Last updated: '+formatNow();
+function loadHistory() {
+  setStatus('Loading history...', true);
+  fetch(BASE + '/api/history?limit=50')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      renderRows(d.alerts || []);
+      setStatus('History - ' + d.count + ' record(s)');
+      lastUpdated.textContent = 'Last updated: ' + formatNow();
     })
-    .catch(function(e){setStatus('Error: '+e.message);});
+    .catch(function(e) { setStatus('Error: ' + e.message); });
 }
 
-window.addEventListener('load',runScan);
+window.addEventListener('load', runScan);
 </script>
 </body>
 </html>
