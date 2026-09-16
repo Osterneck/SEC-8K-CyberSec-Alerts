@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,30 +22,44 @@
   button:disabled { opacity: 0.45; cursor: not-allowed; }
   #btn-scan { background: #1e40af; color: #dbeafe; }
   #btn-history { background: #1e3a2e; color: #86efac; }
-  .tab-group { display: flex; gap: 0.4rem; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 6px; padding: 3px; }
-  .tab { cursor: pointer; font-size: 0.8rem; font-weight: 500; border: none; border-radius: 4px; padding: 0.35rem 0.85rem; background: transparent; color: #64748b; transition: all .15s; }
-  .tab.active { background: #2a3550; color: #f0f4ff; }
+  .tab-group { display: flex; gap: 0; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 6px; overflow: hidden; }
+  .tab { cursor: pointer; font-size: 0.8rem; font-weight: 600; border: none; border-right: 1px solid #2d3748; padding: 0.4rem 1rem; background: transparent; color: #64748b; transition: all .15s; white-space: nowrap; }
+  .tab:last-child { border-right: none; }
+  .tab.active-all    { background: #1e3a5f; color: #93c5fd; }
+  .tab.active-105    { background: #3b0764; color: #ddd6fe; }
+  .tab.active-801    { background: #083344; color: #a5f3fc; }
   #status { font-size: 0.8rem; color: #64748b; }
+  /* Filter context banner */
+  .filter-banner { font-size: 0.78rem; padding: 0.5rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-weight: 500; }
+  .filter-banner.all  { background: #1e3a5f; color: #93c5fd; border-left: 3px solid #3b82f6; }
+  .filter-banner.f105 { background: #3b0764; color: #ddd6fe; border-left: 3px solid #a855f7; }
+  .filter-banner.f801 { background: #083344; color: #a5f3fc; border-left: 3px solid #06b6d4; }
+  /* Card accent by filter */
+  .card { background: #1a1f2e; border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; border: 1px solid #2d3748; }
+  .card.accent-all  { border-left: 3px solid #3b82f6; }
+  .card.accent-105  { border-left: 3px solid #a855f7; }
+  .card.accent-801  { border-left: 3px solid #06b6d4; }
+  .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .card-company { font-size: 1rem; font-weight: 600; color: #f0f4ff; }
+  .card-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 0.6rem; }
+  .score-bar { background: #2d3748; border-radius: 4px; height: 4px; margin-bottom: 0.75rem; }
+  .score-fill-all { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#1e40af,#3b82f6); }
+  .score-fill-105 { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#6b21a8,#a855f7); }
+  .score-fill-801 { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#0e7490,#06b6d4); }
+  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; padding-left: 0.75rem; border-left: 2px solid #334155; }
+  .card-links { margin-bottom: 0.5rem; }
+  .card-links a { font-size: 0.78rem; color: #3b82f6; text-decoration: none; margin-right: 1rem; }
+  .card-links a:hover { text-decoration: underline; }
+  .exposures { font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; }
   .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
   .badge-critical { background: #7f1d1d; color: #fca5a5; }
   .badge-high     { background: #78350f; color: #fcd34d; }
   .badge-moderate { background: #1e3a8a; color: #93c5fd; }
   .badge-watch    { background: #1e3a2e; color: #86efac; }
-  .new-badge { font-size: 0.65rem; background: #166534; color: #bbf7d0; padding: 1px 6px; border-radius: 3px; margin-left: 0.4rem; vertical-align: middle; }
-  .item-tag { font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-left: 0.4rem; vertical-align: middle; }
+  .item-tag { font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; }
   .item-tag-105 { background: #4c1d95; color: #ddd6fe; }
   .item-tag-801 { background: #164e63; color: #a5f3fc; }
-  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
-  .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
-  .card-company { font-size: 1rem; font-weight: 600; color: #f0f4ff; }
-  .card-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 0.6rem; }
-  .score-bar { background: #2d3748; border-radius: 4px; height: 4px; margin-bottom: 0.75rem; }
-  .score-fill { height: 4px; border-radius: 4px; background: linear-gradient(90deg,#1e40af,#3b82f6); }
-  .card-summary { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 0.75rem; border-left: 3px solid #3b82f6; padding-left: 0.75rem; }
-  .card-links { margin-bottom: 0.5rem; }
-  .card-links a { font-size: 0.78rem; color: #3b82f6; text-decoration: none; margin-right: 1rem; }
-  .card-links a:hover { text-decoration: underline; }
-  .exposures { font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; }
+  .new-badge { font-size: 0.65rem; background: #166534; color: #bbf7d0; padding: 1px 6px; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; }
   .filing-text-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #475569; margin: 0.75rem 0 0.4rem; }
   .filing-text { background: #0f1117; border: 1px solid #2d3748; border-radius: 4px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #94a3b8; white-space: pre-wrap; line-height: 1.65; max-height: 320px; overflow-y: auto; }
   #empty { text-align: center; color: #475569; padding: 3rem; font-size: 0.9rem; }
@@ -67,13 +82,14 @@
       <button id="btn-scan" onclick="runScan()">▶ Refresh &amp; Scan</button>
       <button id="btn-history" onclick="loadHistory()">History</button>
       <div class="tab-group">
-        <button class="tab active" onclick="setFilter('all', this)">All</button>
-        <button class="tab" onclick="setFilter('1.05', this)">Item 1.05</button>
-        <button class="tab" onclick="setFilter('8.01', this)">Item 8.01</button>
+        <button class="tab active-all" id="tab-all"   onclick="setFilter('all',  this)">All Cyber</button>
+        <button class="tab"            id="tab-105"   onclick="setFilter('1.05', this)">⚠ Item 1.05 — Material</button>
+        <button class="tab"            id="tab-801"   onclick="setFilter('8.01', this)">◎ Item 8.01 — Voluntary</button>
       </div>
       <span id="status"></span>
     </div>
   </div>
+  <div id="filter-banner"></div>
   <div id="alerts-container"><div id="empty">Loading most recent alerts…</div></div>
 </main>
 <script>
@@ -81,55 +97,62 @@ const BASE = '';
 const status = document.getElementById('status');
 const container = document.getElementById('alerts-container');
 const lastUpdated = document.getElementById('last-updated');
+const filterBanner = document.getElementById('filter-banner');
 let currentFilter = 'all';
-let currentMode = 'scan'; // 'scan' or 'history'
+let currentMode = 'scan';
+
+const FILTER_META = {
+  'all':  { cls: 'all',  label: 'Showing all Item 1.05 and 8.01 cybersecurity filings',                          accent: 'all',  scoreFill: 'score-fill-all' },
+  '1.05': { cls: 'f105', label: '⚠ Item 1.05 — Material Cybersecurity Incidents (mandatory SEC disclosure)',      accent: '105',  scoreFill: 'score-fill-105' },
+  '8.01': { cls: 'f801', label: '◎ Item 8.01 — Voluntary Cybersecurity Disclosures (non-material or undecided)', accent: '801',  scoreFill: 'score-fill-801' },
+};
 
 function setStatus(msg, loading=false) {
   status.textContent = loading ? '⏳ ' + msg : msg;
 }
-
 function formatNow() {
   return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+}
+function urgencyBadge(u) {
+  return `<span class="badge badge-${(u||'watch').toLowerCase()}">${(u||'watch').toLowerCase()}</span>`;
+}
+function itemTag(dtype) {
+  if (!dtype) return '';
+  if (dtype.includes('1_05') || dtype.includes('1.05')) return '<span class="item-tag item-tag-105">1.05</span>';
+  if (dtype.includes('8_01') || dtype.includes('8.01')) return '<span class="item-tag item-tag-801">8.01</span>';
+  return '';
+}
+function formatDisclosureType(raw) {
+  if (!raw) return '';
+  if (raw.includes('1_05') || raw.includes('1.05')) return 'Item 1.05 — Material Cybersecurity Incident';
+  if (raw.includes('8_01') || raw.includes('8.01')) return 'Item 8.01 — Voluntary Cybersecurity Disclosure';
+  return raw;
+}
+function formatMateriality(raw) {
+  if (!raw) return '';
+  const map = { material: 'Material', not_material: 'Not Material', undetermined: 'Materiality Undetermined' };
+  return map[raw] || raw;
 }
 
 function setFilter(filter, el) {
   currentFilter = filter;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
+  // Update tab active classes
+  ['tab-all','tab-105','tab-801'].forEach(id => {
+    const t = document.getElementById(id);
+    t.className = 'tab';
+  });
+  const activeClass = { all: 'active-all', '1.05': 'active-105', '8.01': 'active-801' }[filter];
+  el.classList.add(activeClass);
+  // Update banner
+  const meta = FILTER_META[filter];
+  filterBanner.className = `filter-banner ${meta.cls}`;
+  filterBanner.textContent = meta.label;
   if (currentMode === 'history') loadHistory();
   else runScan();
 }
 
-function urgencyBadge(u) {
-  const urg = (u || 'watch').toLowerCase();
-  return `<span class="badge badge-${urg}">${urg}</span>`;
-}
-
-function itemTag(dtype) {
-  if (!dtype) return '';
-  if (dtype.includes('1_05') || dtype.includes('1.05'))
-    return '<span class="item-tag item-tag-105">1.05</span>';
-  if (dtype.includes('8_01') || dtype.includes('8.01'))
-    return '<span class="item-tag item-tag-801">8.01</span>';
-  return '';
-}
-
-function formatDisclosureType(raw) {
-  if (!raw) return '';
-  if (raw.includes('1_05') || raw.includes('1.05')) return 'Item 1.05 — Material Cybersecurity Incident';
-  if (raw.includes('8_01') || raw.includes('8.01')) return 'Item 8.01 — Other Cybersecurity Event';
-  return raw;
-}
-
-function formatMateriality(raw) {
-  if (!raw) return '';
-  if (raw === 'material') return 'Material';
-  if (raw === 'not_material') return 'Not Material';
-  if (raw === 'undetermined') return 'Materiality Undetermined';
-  return raw;
-}
-
 function renderCard(a, isNew=false) {
+  const meta = FILTER_META[currentFilter];
   const score = a.risk_score ?? 0;
   const company = a.company_name ?? '—';
   const summary = a.summary ?? '';
@@ -141,20 +164,18 @@ function renderCard(a, isNew=false) {
   const rendered = a.rendered_text ?? '';
   const exposuresRaw = a.exposures ?? [];
   const exposures = Array.isArray(exposuresRaw) ? exposuresRaw.join(', ') : exposuresRaw;
-  const filedAt = a.filed_at
-    ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})
-    : '';
+  const filedAt = a.filed_at ? new Date(a.filed_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '';
   const newTag = isNew ? '<span class="new-badge">NEW</span>' : '';
 
   return `
-  <div class="card">
+  <div class="card accent-${meta.accent}">
     <div class="card-header">
       ${urgencyBadge(urgency)}
       <span class="card-company">${company}</span>
       ${itemTag(a.disclosure_type)}${newTag}
       <span style="font-size:.75rem;color:#475569;margin-left:auto">Score: ${score}/100</span>
     </div>
-    <div class="score-bar"><div class="score-fill" style="width:${score}%"></div></div>
+    <div class="score-bar"><div class="${meta.scoreFill}" style="width:${score}%"></div></div>
     <div class="card-meta">
       ${dtype}${mat ? ' &nbsp;·&nbsp; ' + mat : ''}
       ${filedAt ? ' &nbsp;·&nbsp; Filed: ' + filedAt : ''}
@@ -208,6 +229,9 @@ async function loadHistory() {
   } catch(e) { setStatus('Error: ' + e.message); }
 }
 
+// Init banner and load
+filterBanner.className = 'filter-banner all';
+filterBanner.textContent = FILTER_META['all'].label;
 window.addEventListener('load', runScan);
 </script>
 </body>
