@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscribe — SEC CyberSec Alerts</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 1.1rem; font-weight: 600; color: #f0f4ff; }
+  header a { font-size: 0.82rem; color: #3b82f6; text-decoration: none; }
+  main { max-width: 860px; margin: 3rem auto; padding: 0 1.5rem; }
+  .intro { text-align: center; margin-bottom: 2.5rem; }
+  .intro h2 { font-size: 1.6rem; color: #f0f4ff; margin-bottom: 0.75rem; }
+  .intro p { color: #94a3b8; font-size: 0.9rem; max-width: 520px; margin: 0 auto; line-height: 1.7; }
+  .tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
+  .tier { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 1.75rem 1.5rem; display: flex; flex-direction: column; transition: border-color .15s; }
+  .tier:hover { border-color: #3b82f6; }
+  .tier.featured { border-color: #3b82f6; position: relative; }
+  .tier.featured::before { content: "Most Popular"; position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: #1e40af; color: #dbeafe; font-size: 0.65rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; }
+  .tier-name { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #64748b; margin-bottom: 0.5rem; }
+  .tier-price { font-size: 2rem; font-weight: 700; color: #f0f4ff; margin-bottom: 0.2rem; }
+  .tier-price span { font-size: 0.85rem; font-weight: 400; color: #64748b; }
+  .tier-desc { font-size: 0.8rem; color: #94a3b8; margin-bottom: 1.25rem; line-height: 1.6; flex: 1; }
+  .tier-features { list-style: none; margin-bottom: 1.5rem; }
+  .tier-features li { font-size: 0.8rem; color: #cbd5e1; padding: 0.3rem 0; padding-left: 1.2rem; position: relative; }
+  .tier-features li::before { content: "✓"; position: absolute; left: 0; color: #22c55e; font-weight: 700; }
+  .btn { cursor: pointer; width: 100%; padding: 0.75rem; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; font-family: Georgia, serif; background: #1e40af; color: #dbeafe; transition: opacity .15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .note { text-align: center; font-size: 0.75rem; color: #475569; margin-top: 2rem; }
+  .note a { color: #3b82f6; text-decoration: none; }
+  .banner { background: #1e3a2e; border: 1px solid #166534; border-radius: 6px; padding: 0.6rem 1rem; text-align: center; font-size: 0.78rem; color: #86efac; margin-bottom: 2rem; }
+  #msg { text-align: center; font-size: 0.85rem; margin-top: 1.5rem; color: #f87171; min-height: 1.5rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SEC CyberSec Alerts</h1>
+  <a href="/">← Back to Dashboard</a>
+</header>
+<main>
+  <div class="intro">
+    <h2>Real-Time SEC Cyber Breach Intelligence</h2>
+    <p>Instant alerts on every SEC 8-K cybersecurity filing — Item 1.05 material incidents and Item 8.01 voluntary disclosures — delivered as a live embeddable widget.</p>
+  </div>
+
+  <div id="cancelled-banner" class="banner" style="display:none">Payment cancelled — no charge was made. Select a plan below to try again.</div>
+
+  <div class="tiers">
+
+    <div class="tier">
+      <div class="tier-name">Individual</div>
+      <div class="tier-price">$999<span>/year</span></div>
+      <div class="tier-desc">For independent analysts, researchers, and compliance officers monitoring cyber disclosures.</div>
+      <ul class="tier-features">
+        <li>Live widget for 1 domain</li>
+        <li>All Item 1.05 &amp; 8.01 filings</li>
+        <li>Auto-refresh every 60 seconds</li>
+        <li>API key + embed code by email</li>
+      </ul>
+      <button class="btn" onclick="checkout('individual')">Subscribe — $999/yr</button>
+    </div>
+
+    <div class="tier featured">
+      <div class="tier-name">Team</div>
+      <div class="tier-price">$2,499<span>/year</span></div>
+      <div class="tier-desc">For security teams, law firms, and financial institutions tracking breach disclosures across portfolios.</div>
+      <ul class="tier-features">
+        <li>Live widget for up to 5 domains</li>
+        <li>All Item 1.05 &amp; 8.01 filings</li>
+        <li>Auto-refresh every 60 seconds</li>
+        <li>API key + embed code by email</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="btn" onclick="checkout('team')">Subscribe — $2,499/yr</button>
+    </div>
+
+    <div class="tier">
+      <div class="tier-name">Enterprise</div>
+      <div class="tier-price">$4,999<span>/year</span></div>
+      <div class="tier-desc">For enterprise security operations, insurance carriers, and M&amp;A due diligence teams.</div>
+      <ul class="tier-features">
+        <li>Unlimited domains</li>
+        <li>All Item 1.05 &amp; 8.01 filings</li>
+        <li>Auto-refresh every 60 seconds</li>
+        <li>API key + embed code by email</li>
+        <li>Dedicated support</li>
+        <li>Custom integration assistance</li>
+      </ul>
+      <button class="btn" onclick="checkout('enterprise')">Subscribe — $4,999/yr</button>
+    </div>
+
+  </div>
+
+  <div id="msg"></div>
+
+  <div class="note">
+    Secure checkout via Stripe. Annual subscription, billed once.<br>
+    Questions? <a href="mailto:info@form8.live">info@form8.live</a>
+  </div>
+</main>
+
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('cancelled') === '1') {
+    document.getElementById('cancelled-banner').style.display = 'block';
+  }
+})();
+
+function checkout(tier) {
+  var buttons = document.querySelectorAll('.btn');
+  buttons.forEach(function(b) { b.disabled = true; });
+  document.getElementById('msg').textContent = 'Redirecting to secure checkout...';
+  document.getElementById('msg').style.color = '#94a3b8';
+
+  fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tier: tier })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.detail || 'Unknown error');
+    }
+  })
+  .catch(function(err) {
+    document.getElementById('msg').textContent = 'Error: ' + err.message;
+    document.getElementById('msg').style.color = '#f87171';
+    buttons.forEach(function(b) { b.disabled = false; });
+  });
+}
+</script>
+</body>
+</html>
