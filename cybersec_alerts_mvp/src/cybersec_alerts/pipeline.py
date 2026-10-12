@@ -62,7 +62,7 @@ class AlertPipeline:
 
         # Use targeted EFTS cyber search — not generic 8-K feed
         entries = self._sec_client.search_cyber_filings(
-            days_back=30,
+            days_back=180,
             limit=limit,
         )
         LOGGER.info("EFTS cyber search returned %d entries", len(entries))
