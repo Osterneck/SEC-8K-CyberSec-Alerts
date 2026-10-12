@@ -192,7 +192,7 @@ _WIDGET_JS_TEMPLATE = """\
       return;
     }
     body.innerHTML = data.alerts.map(function(a) {
-      var is105 = (a.disclosure_type || '').indexOf('1.05') > -1 || (a.disclosure_type || '').indexOf('ITEM_1_05') > -1;
+      var is105 = (a.disclosure_type || '').toLowerCase().indexOf('item_1_05') > -1 || (a.disclosure_type || '').indexOf('1.05') > -1;
       var badge = is105
         ? '<span class="f8badge f8-105">1.05 Material</span>'
         : '<span class="f8badge f8-801">8.01 Voluntary</span>';
