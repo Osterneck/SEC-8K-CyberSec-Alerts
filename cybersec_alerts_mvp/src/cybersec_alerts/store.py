@@ -23,6 +23,7 @@ class Store:
     def __init__(self, path: Path) -> None:
         self._path = path
         self._initialize()
+        self._ensure_subscribers_table()
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self._path)
@@ -87,6 +88,51 @@ class Store:
             )
             _ensure_alert_type_column(connection)
             connection.commit()
+
+    def _ensure_subscribers_table(self) -> None:
+        """Creates the subscribers table if it does not exist."""
+        with closing(self._connect()) as connection:
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS subscribers (
+                    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email             TEXT NOT NULL,
+                    tier              TEXT NOT NULL,
+                    api_key           TEXT NOT NULL UNIQUE,
+                    stripe_session_id TEXT,
+                    created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+                );
+
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_sub_key ON subscribers(api_key);
+                CREATE INDEX IF NOT EXISTS idx_sub_email ON subscribers(email);
+                """
+            )
+            connection.commit()
+
+    def add_subscriber(
+        self,
+        email: str,
+        tier: str,
+        api_key: str,
+        stripe_session_id: str = "",
+    ) -> None:
+        """Persists a new paid subscriber."""
+        with closing(self._connect()) as connection:
+            connection.execute(
+                """INSERT OR IGNORE INTO subscribers
+                   (email, tier, api_key, stripe_session_id)
+                   VALUES (?, ?, ?, ?)""",
+                (email, tier, api_key, stripe_session_id),
+            )
+            connection.commit()
+
+    def get_subscriber_by_key(self, api_key: str):
+        """Returns subscriber row as dict or None."""
+        with closing(self._connect()) as connection:
+            row = connection.execute(
+                "SELECT * FROM subscribers WHERE api_key = ?", (api_key,)
+            ).fetchone()
+        return dict(row) if row else None
 
     def seen(self, accession: str) -> bool:
         with closing(self._connect()) as connection:
