@@ -1,7 +1,7 @@
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
-
+ 
 [project]
 name = "cybersec-alerts"
 version = "0.1.0"
@@ -13,23 +13,25 @@ authors = [
 ]
 license = {text = "Proprietary - rough-draft MVP"}
 dependencies = []
-
+ 
 [project.optional-dependencies]
 web = [
   "fastapi>=0.111.0",
   "uvicorn[standard]>=0.29.0",
+  "stripe>=8.0.0",
 ]
 dev = [
   "pytest",
   "httpx",   # FastAPI test client
 ]
-
+ 
 [project.scripts]
 cybersec-alerts = "cybersec_alerts.cli:main"
-
+ 
 [tool.setuptools.packages.find]
 where = ["src"]
-
+ 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+ 
