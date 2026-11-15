@@ -153,6 +153,13 @@ class SecClient:
                 seen.add(e.accession)
                 unique.append(e)
 
+        # Sort newest-first before truncating to `limit`. EFTS does not
+        # guarantee date-descending order (it appears to rank by
+        # relevance), so without this sort the same older, higher-scoring
+        # filings keep winning the `limit` cutoff on every run while
+        # genuinely newer filings never get included at all.
+        unique.sort(key=lambda e: e.filed_at, reverse=True)
+
         LOGGER.info("EFTS cyber search returned %d unique filings", len(unique))
         return unique[:limit]
 
