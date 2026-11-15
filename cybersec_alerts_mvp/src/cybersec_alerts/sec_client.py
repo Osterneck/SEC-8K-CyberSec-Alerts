@@ -108,15 +108,34 @@ class SecClient:
         start = (datetime.now(timezone.utc) - timedelta(days=days_back)).date()
         entries: list[FeedEntry] = []
 
+        page_size = 100
+        max_pages = 50  # safety cap: 50 * 100 = 5,000 hits per term
+
         for item_term in ["Item+1.05", "Item+8.01"]:
-            url = (
-                f"{EFTS_BASE}?q=%22{item_term}%22&forms=8-K"
-                f"&dateRange=custom&startdt={start}&enddt={end}&size=100"
-            )
-            try:
-                payload = self._get(url)
-                data = json.loads(payload)
-                hits = data.get("hits", {}).get("hits", [])
+            from_offset = 0
+            page_count = 0
+            while page_count < max_pages:
+                url = (
+                    f"{EFTS_BASE}?q=%22{item_term}%22&forms=8-K"
+                    f"&dateRange=custom&startdt={start}&enddt={end}"
+                    f"&size={page_size}&from={from_offset}"
+                )
+                try:
+                    payload = self._get(url)
+                    data = json.loads(payload)
+                    hits_block = data.get("hits", {})
+                    hits = hits_block.get("hits", [])
+                    total = hits_block.get("total", {}).get("value", 0)
+                except Exception as exc:
+                    LOGGER.warning(
+                        "EFTS search failed for %s (from=%d): %s",
+                        item_term, from_offset, exc,
+                    )
+                    break
+
+                if not hits:
+                    break
+
                 for hit in hits:
                     src = hit.get("_source", {})
                     adsh = src.get("adsh", "")
@@ -143,8 +162,18 @@ class SecClient:
                         filing_url=filing_url,
                         accession=adsh,
                     ))
-            except Exception as exc:
-                LOGGER.warning("EFTS search failed for %s: %s", item_term, exc)
+
+                page_count += 1
+                from_offset += page_size
+                if from_offset >= total:
+                    break
+
+            if page_count >= max_pages:
+                LOGGER.warning(
+                    "EFTS search for %s hit the %d-page safety cap — "
+                    "there may be more unfetched hits in this window.",
+                    item_term, max_pages,
+                )
 
         # Deduplicate by accession
         seen: set[str] = set()
