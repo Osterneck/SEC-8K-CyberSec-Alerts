@@ -1,4 +1,5 @@
 
+
 """SEC EDGAR ingestion client."""
 
 from __future__ import annotations
@@ -110,7 +111,7 @@ class SecClient:
         for item_term in ["Item+1.05", "Item+8.01"]:
             url = (
                 f"{EFTS_BASE}?q=%22{item_term}%22&forms=8-K"
-                f"&dateRange=custom&startdt={start}&enddt={end}"
+                f"&dateRange=custom&startdt={start}&enddt={end}&size=100"
             )
             try:
                 payload = self._get(url)
