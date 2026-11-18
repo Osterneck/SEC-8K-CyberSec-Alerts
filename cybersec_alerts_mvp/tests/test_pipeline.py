@@ -1,3 +1,4 @@
+
 """Tests for longitudinal filing-to-enforcement correlation."""
 
 from datetime import datetime, timezone
@@ -13,8 +14,8 @@ class _FakeSecClient:
     def __init__(self) -> None:
         self._returned = False
 
-    def list_current_8k(self, limit: int = 40) -> list[FeedEntry]:
-        del limit
+    def search_cyber_filings(self, days_back: int = 30, limit=None) -> list[FeedEntry]:
+        del days_back, limit
         if self._returned:
             return []
         self._returned = True
