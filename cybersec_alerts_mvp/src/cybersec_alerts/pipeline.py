@@ -1,3 +1,4 @@
+
 """Alert pipeline orchestration."""
 
 from __future__ import annotations
@@ -61,16 +62,19 @@ class AlertPipeline:
         self._process_enforcement_updates(actions)
 
         # Use targeted EFTS cyber search — not generic 8-K feed
-        entries = self._sec_client.search_cyber_filings(
-            days_back=180,
-            limit=limit,
-        )
-        LOGGER.info("EFTS cyber search returned %d entries", len(entries))
+        entries = self._sec_client.search_cyber_filings(days_back=180)
+        # Drop already-processed filings FIRST, then apply `limit`.
+        # Previously `limit` was applied before this filter, so every scan
+        # re-selected the same already-seen filings and skipped them,
+        # and newer filings outside that window were never fetched.
+        entries = [
+            e for e in entries
+            if not (e.accession and self._store.seen(e.accession))
+        ][:limit]
+        LOGGER.info("EFTS cyber search: %d new entries to process", len(entries))
 
         alerts: list[Alert] = []
         for entry in entries:
-            if entry.accession and self._store.seen(entry.accession):
-                continue
             try:
                 filing = self._sec_client.fetch_filing(entry)
             except Exception:  # pylint: disable=broad-exception-caught
