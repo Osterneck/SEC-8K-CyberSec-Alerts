@@ -1,5 +1,6 @@
 
 
+
 """SEC EDGAR ingestion client."""
 
 from __future__ import annotations
@@ -102,8 +103,15 @@ class SecClient:
         payload = self._get(f"{CURRENT_FILINGS_URL}?{query}")
         return self._parse_atom(payload)[:limit]
 
-    def search_cyber_filings(self, days_back: int = 30, limit: int = 40) -> list[FeedEntry]:
-        """Searches EDGAR EFTS for recent Item 1.05 and 8.01 cyber filings."""
+    def search_cyber_filings(
+        self, days_back: int = 30, limit: int | None = None,
+    ) -> list[FeedEntry]:
+        """Searches EDGAR EFTS for recent Item 1.05 and cyber Item 8.01 filings.
+
+        Returns ALL matching filings (newest first) unless ``limit`` is set.
+        Callers should drop already-seen accessions BEFORE truncating, or
+        new filings get crowded out by ones already processed.
+        """
         end = datetime.now(timezone.utc).date()
         start = (datetime.now(timezone.utc) - timedelta(days=days_back)).date()
         entries: list[FeedEntry] = []
@@ -111,12 +119,25 @@ class SecClient:
         page_size = 100
         max_pages = 50  # safety cap: 50 * 100 = 5,000 hits per term
 
-        for item_term in ["Item+1.05", "Item+8.01"]:
+        # Item 1.05 is cyber-specific by definition. A bare "Item 8.01"
+        # search matches nearly every "Other Events" 8-K (hundreds a day),
+        # which flooded the result set and pushed real cyber filings out
+        # of the cutoff. Pair 8.01 with cyber phrases (EFTS ANDs terms).
+        query_terms = [
+            "%22Item+1.05%22",
+            "%22Item+8.01%22+%22cybersecurity+incident%22",
+            "%22Item+8.01%22+%22cyber+incident%22",
+            "%22Item+8.01%22+ransomware",
+            "%22Item+8.01%22+%22unauthorized+access%22",
+            "%22Item+8.01%22+%22data+breach%22",
+            "%22Item+8.01%22+%22threat+actor%22",
+        ]
+        for item_term in query_terms:
             from_offset = 0
             page_count = 0
             while page_count < max_pages:
                 url = (
-                    f"{EFTS_BASE}?q=%22{item_term}%22&forms=8-K"
+                    f"{EFTS_BASE}?q={item_term}&forms=8-K"
                     f"&dateRange=custom&startdt={start}&enddt={end}"
                     f"&size={page_size}&from={from_offset}"
                 )
@@ -191,7 +212,7 @@ class SecClient:
         unique.sort(key=lambda e: e.filed_at, reverse=True)
 
         LOGGER.info("EFTS cyber search returned %d unique filings", len(unique))
-        return unique[:limit]
+        return unique if limit is None else unique[:limit]
 
     def fetch_filing(self, entry: FeedEntry) -> SecFiling:
         """Downloads and normalizes a filing from a feed entry."""
